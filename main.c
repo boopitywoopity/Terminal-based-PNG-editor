@@ -14,10 +14,10 @@ void load_colours_select_fill(int init_y,int init_x,int range_y,int range_x,int 
 void select_fill_from_image(unsigned int *x,unsigned int *y,int width,int height);
 
 void load_image_information(int x,int y,int height,int width);
-void generate_colors_from_pixel_ratio(int y,int x,int height,int width);
+void generate_colors_from_pixel_ratio(unsigned int *y,unsigned int *x,int height,int width);
 void key_press(unsigned int *x,unsigned int *y,int *width,int *height,char input,int *quit);
 void create_window(int height,int width);
-int load_colours(int width,int height);
+int load_colours(int width, int height);
 
 
 
@@ -105,7 +105,7 @@ int main(int e, char **args){
                                         struct xy_point point;
                                         point.x = x;
                                         point.y = y;
-                                        colour.point = malloc(sizeof(struct xy_point*)*1000000);
+                                        colour.point = malloc(sizeof(struct xy_point*)*1000000000);
                                         colour.point[colour.length++] = point;
                                         colours[current_colours++] = colour;
                                 }
@@ -195,22 +195,22 @@ void key_press(unsigned int *x,unsigned int *y,int *width,int *height,char input
                         if (current_colour == -1)    
                                 break;
                         draw_at(*x, *y, *width, *height, user_colours[current_colour].r, user_colours[current_colour].g, user_colours[current_colour].b);
-                        generate_colors_from_pixel_ratio(*y,*x,*height, *width);
+                        generate_colors_from_pixel_ratio(&*y,&*x,*height, *width);
                         load_colours(*width, *height);
                         break;
                 case 'c':
                         cut_at(*x,*y,*width,*height);
-                        generate_colors_from_pixel_ratio(*y,*x,*height,*width);
+                        generate_colors_from_pixel_ratio(&*y,&*x,*height,*width);
                         load_colours(*width, *height);
                         break;
                 case 'v':
                         select_fill_from_image(&*x, &*y, *width, *height);
-                        generate_colors_from_pixel_ratio(*y,*x,*height,*width);
+                        generate_colors_from_pixel_ratio(&*y,&*x,*height,*width);
                         load_colours(*width, *height);
                         break;
                 case 'V':
                         select_from_image(&*x,&*y,*width,*height);
-                        generate_colors_from_pixel_ratio(*y,*x,*height,*width);
+                        generate_colors_from_pixel_ratio(&*y,&*x,*height,*width);
                         load_colours(*width, *height);
                         break;
                 case ':': // handles commands from the user
@@ -252,9 +252,8 @@ void key_press(unsigned int *x,unsigned int *y,int *width,int *height,char input
                                                 init_pair(17+i,COLOR_BLACK,17+i);
                                         }
                                         attron(COLOR_PAIR(17+i));
-                                        mvprintw(LINES-3,i*10,"Colour %d",i+1);
+                                        mvprintw(LINES-3,i*10,"Colour %d",i);
                                         attroff(COLOR_PAIR(17+i));
-
                                 }
                                 move(LINES-1,0);
                                 clrtoeol();
@@ -365,7 +364,6 @@ void key_press(unsigned int *x,unsigned int *y,int *width,int *height,char input
                                                                         mvaddch(LINES-1,cur_x_pos,' ');
                                                                         move(LINES-1,cur_x_pos);
                                                                 }
-
                                                         }
                                                         move(LINES-1,0);
                                                         clrtoeol();
@@ -440,7 +438,7 @@ void key_press(unsigned int *x,unsigned int *y,int *width,int *height,char input
                                         if ((*height%total)==0 && (*width%total)==0){
                                                 pixel_ratio = total;
                                                 printw("Pixel ratio =%d",pixel_ratio);
-                                                generate_colors_from_pixel_ratio(*y,*x,*height,*width);
+                                                generate_colors_from_pixel_ratio(&*y,&*x,*height,*width);
                                                 load_colours(*width,*height);
                                         }
                                         else{
@@ -457,12 +455,20 @@ void key_press(unsigned int *x,unsigned int *y,int *width,int *height,char input
         loop_count = 1;
         loop_input_assigned = 0;
 }
-void generate_colors_from_pixel_ratio(int y,int x,int height,int width){
-        if (y+y_buffer>height){
-                y_buffer = height-y;
+void generate_colors_from_pixel_ratio(unsigned int *y,unsigned int *x,int height,int width){
+        if (*y+y_buffer>height){
+                y_buffer = height-*y;
+                if (y_buffer < 0){
+                        y_buffer = 0;
+                        *y = height;
+                }
         }
-        if (x+x_buffer>width){
-                x_buffer = width-x;
+        if (*x+x_buffer>width){
+                x_buffer = width-*x;
+                if (x_buffer<0){
+                        x_buffer = 0;
+                        *x = width;
+                }
         }
         int y_pos = 0;
         int x_pos = 0;
@@ -502,7 +508,7 @@ void generate_colors_from_pixel_ratio(int y,int x,int height,int width){
                                         colours[colour_position].length += 1;
                                 }
                                 else{
-                                        colour.point = malloc(sizeof(struct xy_point*)*1000000);
+                                        colour.point = malloc(sizeof(struct xy_point*)*100000000);
                                         colour.point[0].x = x_pos;
                                         colour.point[0].y = y_pos;
                                         colour.length += 1;
@@ -528,6 +534,7 @@ void select_from_image(unsigned int *x,unsigned int *y,int width, int height){
         char input;
         int run=1;
         while (run){
+                move(*y,*x);
                 input = getch();
                 if ('0' <= input && input <= '9'){
                         if (!loop_input_assigned){
@@ -628,10 +635,20 @@ void select_from_image(unsigned int *x,unsigned int *y,int width, int height){
                                 break;
                         case 'c':
                                 for (int i=0;i<coord_count;i++){
-                                        cut_at(coord[i].x, coord[i].y, height, width);
+                                        cut_at(coord[i].x-x_buffer, coord[i].y-y_buffer, height, width);
                                 }
                                 loop_count = 1;
                                 loop_input_assigned =0;
+                                run = 0;
+                                break;
+                        case 'd':
+                                for (int i=0;i<coord_count && current_colour != -1;i++){
+                                        int x = coord[i].x;
+                                        int y = coord[i].y;
+                                        draw_at(x-x_buffer,y-y_buffer,height,width,user_colours[current_colour].r,user_colours[current_colour].g,user_colours[current_colour].b);
+                                }
+                                loop_input_assigned = 0;
+                                loop_count = 0;
                                 run = 0;
                                 break;
 
@@ -688,6 +705,7 @@ void select_fill_from_image(unsigned int *x,unsigned int *y,int width,int height
         load_colours_select_fill(init_y,init_x,range_y,range_x,width, height);
 
         while (run){
+                move(*y,*x);
                 input = getch();
                 if (input >= '0' && input <= '9'){
                         if (!loop_input_assigned){
@@ -788,14 +806,38 @@ void select_fill_from_image(unsigned int *x,unsigned int *y,int width,int height
                                 }
                                 for (int y_pos = tmp_init_y;y_pos <=y_range;y_pos++){
                                         for (int x_pos=tmp_init_x;x_pos<=x_range;x_pos++){
-                                                cut_at(x_pos,y_pos,width,height);
+                                                cut_at(x_pos-x_buffer,y_pos-y_buffer,width,height);
                                         }
                                 }
                                 loop_input_assigned = 0;
                                 loop_count = 1;
                                 run = 0;
                                 break;
-                        default:
+                        case 'd':
+                                if (true){}
+                                int tmp_init_y1 = init_y;
+                                int tmp_init_x1 = init_x;
+                                int y_range1 = init_y + range_y;
+                                int x_range1 = init_x + range_x;
+                                if (y_range1 < tmp_init_y1){
+                                        int tmp_y = tmp_init_y1;
+                                        tmp_init_y1 = y_range1;
+                                        y_range1 = tmp_y;
+                                }
+                                if (range_x < 0){
+                                        int tmp_x = tmp_init_x1;
+                                        tmp_init_x1 = x_range1;
+                                        x_range1 = tmp_x;
+                                }
+                                for (int y_pos = tmp_init_y1;y_pos <=y_range1 && current_colour != -1;y_pos++){
+                                        for (int x_pos=tmp_init_x1;x_pos<=x_range1;x_pos++){
+                                                draw_at(x_pos-x_buffer,y_pos-y_buffer,width,height,user_colours[current_colour].r,user_colours[current_colour].g,user_colours[current_colour].b);
+                                        }
+                                }
+                                loop_input_assigned = 0;
+                                loop_count = 1;
+                                run = 0;
+                                
                                 break;
 
                 }

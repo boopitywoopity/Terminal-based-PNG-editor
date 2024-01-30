@@ -66,8 +66,8 @@ void cut_at(int x,int y,int width,int height){
 void draw_at(int x,int y,int width,int height,int r,int g,int b){
         y = (y+y_buffer)*pixel_ratio;
         x = (x+x_buffer)*pixel_ratio;
-        for (int rel_y=y+y_buffer;rel_y-y-y_buffer<pixel_ratio;rel_y++){
-                for (int rel_x=x+x_buffer;rel_x-x-x_buffer<pixel_ratio;rel_x++){
+        for (int rel_y=y;rel_y-y<pixel_ratio;rel_y++){
+                for (int rel_x=x;rel_x-x<pixel_ratio;rel_x++){
                         total_image[rel_y][rel_x].r = r;
                         total_image[rel_y][rel_x].g = g;
                         total_image[rel_y][rel_x].b = b;
