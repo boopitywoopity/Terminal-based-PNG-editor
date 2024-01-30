@@ -6,7 +6,7 @@
 #include <string.h>
 #include "util.c"
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "lib/stb_image.h"
 void select_from_image(unsigned int *x,unsigned int *y,int width,int height);
 void load_colours_select(struct xy_point *points,int point_num,int width,int height);
 
