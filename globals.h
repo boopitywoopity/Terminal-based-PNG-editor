@@ -6,8 +6,11 @@
 // global variable declaration goes here
 
 extern WINDOW *win;
-extern int x_buffer;
-extern int y_buffer;
+
+// used to calculate the location at which you should start drawing from
+// ie, on the screen you might be at position 4, but really the pixel you are over is at position 20
+extern int x_buffer, y_buffer;
+
 extern int loop_count;
 extern int loop_input_assigned;
 

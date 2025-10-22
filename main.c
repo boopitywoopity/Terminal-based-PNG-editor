@@ -20,18 +20,21 @@
 
 void select_from_image(unsigned int *x, unsigned int *y, int width, int height);
 void load_colors_select( xy_point *points, int point_num, int width,
-                         int height);
+                        int height);
 
 void load_colors_select_fill(int init_y, int init_x, int range_y, int range_x,
-                              int width, int height);
+                             int width, int height);
+
 void select_fill_from_image(unsigned int *x, unsigned int *y, int width,
                             int height);
 
 void load_image_information(int x, int y, int height, int width);
 void generate_colors_from_pixel_ratio(unsigned int *y, unsigned int *x,
                                       int height, int width);
+
 void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                char input, int *quit);
+
 void create_window(int height, int width);
 int load_colors(int width, int height);
 
@@ -100,7 +103,7 @@ int main(int e, char **args) {
     char ch; // the input provided by the user
     int quit = 0;
 
-    // this the main loop
+    // this the main loop (no shit sherlock)
     while (!quit) {
         load_image_information(curx, cury, height, width);
         move(cury, curx);
@@ -123,7 +126,8 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
         if (!loop_input_assigned) {
             loop_count = input - '0';
             loop_input_assigned = 1;
-        } else {
+        }
+        else {
             loop_count *= 10;
             loop_count += input - '0';
         }
@@ -194,10 +198,9 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
             load_colors(*width, *height);
             break;
         case ':': // handles commands from the user
-            // REMOVE WHEN ITS FINISHED
+            // TODO: REMOVE WHEN ITS FINISHED
             if (true)
                 ; // this is there because if it isnt the lsp screams at me that there is
-            // an error, but it still runs...
             int command_len = 0;
             char *command = malloc(sizeof(char) * 100);
             char input;
@@ -211,7 +214,8 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                     command[command_len--] = '\0';
                     mvaddch(LINES - 1, --xpos, ' ');
                     move(LINES - 1, xpos);
-                } else if (input != 127) {
+                }
+                else if (input != 127) {
                     value = value * 10 + input - '0';
                     command[command_len++] = input;
                     mvaddch(LINES - 1, xpos++, input);
@@ -233,8 +237,8 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                         0.144 * user_colors[i].b) /
                         255;
                     init_extended_color(17 + i, user_colors[i].r * 1000 / 255,
-                               user_colors[i].g * 1000 / 255,
-                               user_colors[i].b * 1000 / 255);
+                                        user_colors[i].g * 1000 / 255,
+                                        user_colors[i].b * 1000 / 255);
                     if (color_brightness < 0.5) {
                         init_extended_pair(17 + i, COLOR_WHITE, 17 + i);
                     } else {
@@ -249,26 +253,30 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                 char *color_command = malloc(sizeof(char) * 100);
                 int col_cmd_len = 0;
                 char col_input;
-                int cmd_selected_color = -1; // this is the selected color that the user
-                // has chosen for the action
+
+                // this is the selected color that the user has chosen for the action
+                int cmd_selected_color = -1;
 
                 while ((col_input = getch()) != '\n' && col_cmd_len != 100 &&
                     col_input != 27) {
                     if (cmd_selected_color == -1 && col_input >= '0' && col_input <= '9') {
                         cmd_selected_color = col_input - '0';
                         addch(col_input);
-                    } else if (cmd_selected_color != -1) {
+                    }
+                    else if (cmd_selected_color != -1) {
                         if (col_input == 127) {
                             if (col_cmd_len == 0) {
                                 cmd_selected_color = -1;
                                 mvaddch(LINES - 1, 0, ' ');
                                 move(LINES - 1, 0);
-                            } else {
+                            }
+                            else {
                                 color_command[col_cmd_len--] = '\0';
                                 mvaddch(LINES - 1, col_cmd_len, ' ');
                                 move(LINES - 1, col_cmd_len);
                             }
-                        } else {
+                        }
+                        else {
                             color_command[col_cmd_len++] = col_input;
                             addch(col_input);
                         }
@@ -280,7 +288,8 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                 if (col_input != 27 && cmd_selected_color != -1) {
                     if (strcmp(color_command, "-use") == 0) {
                         current_color = cmd_selected_color;
-                    } else if (strcmp(color_command, "-set") == 0) {
+                    }
+                    else if (strcmp(color_command, "-set") == 0) {
                         int accept = 0;
                         while (!accept) {
                             int r = 0;
@@ -314,11 +323,13 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                                             addch(num);
                                             break;
                                     }
-                                } else if (num == ',' && cur < 2) {
+                                }
+                                else if (num == ',' && cur < 2) {
                                     cur_x_pos += 1;
                                     cur += 1;
                                     addch(num);
-                                } else if (num == 127 && cur_x_pos != 38) {
+                                }
+                                else if (num == 127 && cur_x_pos != 38) {
                                     switch (cur) {
                                         case 0:
                                             if (r != 0) {
@@ -329,7 +340,8 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                                         case 1:
                                             if (g == 0) {
                                                 cur -= 1;
-                                            } else {
+                                            }
+                                            else {
                                                 g /= 10;
                                                 cur_x_pos -= 1;
                                             }
@@ -337,7 +349,8 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                                         case 2:
                                             if (b == 0) {
                                                 cur -= 1;
-                                            } else {
+                                            }
+                                            else {
                                                 b /= 10;
                                                 cur_x_pos -= 1;
                                             }
@@ -350,9 +363,11 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                             }
                             move(LINES - 1, 0);
                             clrtoeol();
+                            // TODO: finish this
                             if (cur != 2) {
 
-                            } else {
+                            }
+                            else {
                                 if (r > 255) {
                                     r = 255;
                                 }
@@ -367,7 +382,8 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                                 init_extended_color(16, r * 1000 / 255, g * 1000 / 255, b * 1000 / 255);
                                 if (color_brightness < 0.5) {
                                     init_extended_pair(16, COLOR_WHITE, 16);
-                                } else {
+                                }
+                                else {
                                     init_extended_pair(16, COLOR_BLACK, 16);
                                 }
                                 attron(COLOR_PAIR(16));
@@ -384,7 +400,8 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                                 }
                             }
                         }
-                    } else {
+                    }
+                    else {
                         move(LINES - 1, 0);
                         clrtoeol();
                         printw("Invalid input the command you gave in was %d%s",
@@ -393,22 +410,25 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                     }
                 }
                 free(color_command);
-            } else if (compare_at(command, "cr",
-                                  2)) { // this will be used to crop from the file
+            }
+            else if (compare_at(command, "cr",
+                                2)) { // this will be used to crop from the file
                 // DONT FORGET TO WRITE IT
                 int total = 0;
                 int negative = 1;
                 for (int pos = 2; pos < command_len; pos++) {
                     if (command[pos] == '-') {
                         negative = -1;
-                    } else {
+                    }
+                    else {
                         total = total * 10;
                         total += command[pos] - '0';
                     }
                 }
                 total *= negative;
 
-            } else if (compare_at(command, "pr", 2)) { // create the pixel ratio
+            }
+            else if (compare_at(command, "pr", 2)) { // create the pixel ratio
                 int total = 0;
                 for (int pos = 2; pos < command_len; pos++) {
                     total = total * 10;
@@ -420,7 +440,8 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                         printw("Pixel ratio =%d", pixel_ratio);
                         generate_colors_from_pixel_ratio(&*y, &*x, *height, *width);
                         load_colors(*width, *height);
-                    } else {
+                    }
+                    else {
                         mvaddstr(LINES - 1, 0, "Invalid input (press any key to continue)");
                         getch();
                     }
@@ -507,15 +528,21 @@ void generate_colors_from_pixel_ratio(unsigned int *y, unsigned int *x,
         y_pos += 1;
     }
 }
+
 void select_from_image(unsigned int *x, unsigned int *y, int width,
                        int height) {
-    xy_point *coord = malloc(sizeof(xy_point) * 2000);
+    int max_coords = 256; // the maximum ammount of coords currently selected, used to grow the coords if necessary
+    xy_point *coord = malloc(sizeof(xy_point) * max_coords); // all the selected coords
+    // set the initial coord
     coord[0].x = *x + x_buffer;
     coord[0].y = *y + y_buffer;
     int coord_count = 1;
+
     load_colors_select(coord, coord_count, width, height);
+
     char input;
     int run = 1;
+
     while (run) {
         move(*y, *x);
         input = getch();
@@ -523,7 +550,8 @@ void select_from_image(unsigned int *x, unsigned int *y, int width,
             if (!loop_input_assigned) {
                 loop_count = input - '0';
 
-            } else {
+            }
+            else {
                 loop_count = loop_count * 10;
                 loop_count += input - '0';
             }
@@ -533,7 +561,8 @@ void select_from_image(unsigned int *x, unsigned int *y, int width,
                 if (loop_input_assigned) {
                     loop_count = 1;
                     loop_input_assigned = 0;
-                } else {
+                }
+                else {
                     run = 0;
                 }
                 break;
@@ -541,10 +570,19 @@ void select_from_image(unsigned int *x, unsigned int *y, int width,
                 for (int i = 0; i < loop_count; i++) {
                     if (*x > 0) {
                         *x -= 1;
+                        if (coord_count == max_coords){
+                            max_coords *= 2;
+                            coord = realloc(coord, sizeof(xy_point)*max_coords);
+                        }
                         coord[coord_count].x = *x + x_buffer;
                         coord[coord_count].y = *y + y_buffer;
                         coord_count += 1;
-                    } else if (x_buffer > 0) {
+                    }
+                    else if (x_buffer > 0) {
+                        if (coord_count == max_coords){
+                            max_coords *= 2;
+                            coord = realloc(coord, sizeof(xy_point)*max_coords);
+                        }
                         x_buffer -= 1;
                         coord[coord_count].x = *x + x_buffer;
                         coord[coord_count].y = *y + y_buffer;
@@ -559,11 +597,20 @@ void select_from_image(unsigned int *x, unsigned int *y, int width,
                 for (int i = 0; i < loop_count && i < height / pixel_ratio; i++) {
                     if (*x + 1 < width / pixel_ratio && *x < COLS - 2) {
                         *x += 1;
+                        if (coord_count == max_coords){
+                            max_coords *= 2;
+                            coord = realloc(coord, sizeof(xy_point)*max_coords);
+                        }
                         coord[coord_count].x = *x + x_buffer;
                         coord[coord_count].y = *y + y_buffer;
                         coord_count += 1;
-                    } else if (x_buffer + *x + 1 < width / pixel_ratio && *x == COLS - 2) {
+                    }
+                    else if (x_buffer + *x + 1 < width / pixel_ratio && *x == COLS - 2) {
                         x_buffer += 1;
+                        if (coord_count == max_coords){
+                            max_coords *= 2;
+                            coord = realloc(coord, sizeof(xy_point)*max_coords);
+                        }
                         coord[coord_count].x = *x + x_buffer;
                         coord[coord_count].y = *y + y_buffer;
                         coord_count += 1;
@@ -577,12 +624,21 @@ void select_from_image(unsigned int *x, unsigned int *y, int width,
                 for (int i = 0; i < loop_count && i < height / pixel_ratio; i++) {
                     if (*y + 1 < height / pixel_ratio && *y < LINES - 3) {
                         *y += 1;
+                        if (coord_count == max_coords){
+                            max_coords *= 2;
+                            coord = realloc(coord, sizeof(xy_point)*max_coords);
+                        }
                         coord[coord_count].x = *x + x_buffer;
                         coord[coord_count].y = *y + y_buffer;
                         coord_count += 1;
-                    } else if (y_buffer + *y + 1 < height / pixel_ratio &&
+                    }
+                    else if (y_buffer + *y + 1 < height / pixel_ratio &&
                         *y == LINES - 3) {
                         y_buffer += 1;
+                        if (coord_count == max_coords){
+                            max_coords *= 2;
+                            coord = realloc(coord, sizeof(xy_point)*max_coords);
+                        }
                         coord[coord_count].x = *x + x_buffer;
                         coord[coord_count].y = *y + y_buffer;
                         coord_count += 1;
@@ -596,11 +652,20 @@ void select_from_image(unsigned int *x, unsigned int *y, int width,
                 for (int i = 0; i < loop_count; i++) {
                     if (*y > 0) {
                         *y -= 1;
+                        if (coord_count == max_coords){
+                            max_coords *= 2;
+                            coord = realloc(coord, sizeof(xy_point)*max_coords);
+                        }
                         coord[coord_count].x = *x + x_buffer;
                         coord[coord_count].y = *y + y_buffer;
                         coord_count += 1;
-                    } else if (y_buffer > 0) {
+                    }
+                    else if (y_buffer > 0) {
                         y_buffer -= 1;
+                        if (coord_count == max_coords){
+                            max_coords *= 2;
+                            coord = realloc(coord, sizeof(xy_point)*max_coords);
+                        }
                         coord[coord_count].x = *x + x_buffer;
                         coord[coord_count].y = *y + y_buffer;
                         coord_count += 1;
@@ -636,7 +701,7 @@ void select_from_image(unsigned int *x, unsigned int *y, int width,
 }
 
 void load_colors_select( xy_point *points, int point_num, int width,
-                         int height) {
+                        int height) {
 
     move(0, 0);
     attron(A_NORMAL);
@@ -823,7 +888,7 @@ void select_fill_from_image(unsigned int *x, unsigned int *y, int width,
 }
 
 void load_colors_select_fill(int init_y, int init_x, int range_y, int range_x,
-                              int width, int height) {
+                             int width, int height) {
     move(0, 0);
     attron(A_NORMAL);
     for (int y = 0; y < LINES - 2; y++) {
@@ -848,7 +913,7 @@ void load_colors_select_fill(int init_y, int init_x, int range_y, int range_x,
     for (int i = 0; i < current_colors; i++) {
         colors[i].code = color_index;
         init_extended_color(color_index, colors[i].r * 1000 / 255,
-                   colors[i].g * 1000 / 255, colors[i].b * 1000 / 255);
+                            colors[i].g * 1000 / 255, colors[i].b * 1000 / 255);
         init_extended_pair(color_index, COLOR_BLACK, color_index);
         attron(COLOR_PAIR(color_index));
         for (int n = 0; n < colors[i].length; n++) {

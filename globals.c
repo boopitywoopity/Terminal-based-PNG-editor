@@ -4,6 +4,7 @@
 WINDOW *win = NULL;
 int x_buffer = 0;
 int y_buffer = 0;
+
 int loop_count = 1;
 int loop_input_assigned = 0;
 

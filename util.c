@@ -26,6 +26,7 @@ void cut_at(int x,int y,int width,int height){
     }
 }
 
+// sets a selected area of the image to the color seleced by the user
 void draw_at(int x,int y,int width,int height,int r,int g,int b){
     y = (y+y_buffer)*pixel_ratio;
     x = (x+x_buffer)*pixel_ratio;
