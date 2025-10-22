@@ -85,14 +85,14 @@ int main(int e, char **args) {
     // fprintf(stderr, "test 1\n");
 
     colours = malloc(sizeof(RGB_spectrum) * current_max_colours);
-    // total_image = malloc(sizeof( point_w_color) * height * width);
-    total_image = malloc(sizeof(point_w_color *) * (height+1));
 
+    total_image = malloc(sizeof(point_w_color *) * (height+1));
     if (total_image == NULL) { // there was a failur to allocate enough memory for the total image
         endwin();
         printf("There was an issue allocating memory for the total image\n");
         return 0;
     }
+
     // fprintf(stderr, "test 2\n");
 
     for (int y = 0; y < height; y++) {
@@ -100,7 +100,7 @@ int main(int e, char **args) {
         // total_image[y] = malloc(sizeof( point_w_color *) * 400000); // alocates the memory per line
         for (int x = 0; x < width; x++) {
             int index = (y * width + x) * 4;
-            fprintf(stderr, "current index: (%d, %d), %d\n", x, y, index);
+            // fprintf(stderr, "current index: (%d, %d), %d\n", x, y, index);
             total_image[y][x].r = image[index]; // makes the variables for the point
             total_image[y][x].g = image[index + 1];
             total_image[y][x].b = image[index + 2];
@@ -110,6 +110,9 @@ int main(int e, char **args) {
             // would make the pixel invisible
             if (image[index + 3] != 0) {
                 // fprintf(stderr, "current_colours: %d\n", current_colours);
+
+                // create a new color, if the color already exists just ignore this and use the existing one, otherwise use it
+                // a better way to do this might be to hash the rgb values and then look to see if it exists
                 RGB_spectrum colour;
                 colour.r = image[index];
                 colour.g = image[index + 1];
@@ -117,9 +120,11 @@ int main(int e, char **args) {
                 colour.length = 0;
 
                 // fprintf(stderr, "colour: (%d, %d, %d) ", colour.r, colour.g, colour.b);
+
+                // this color already exists, bind the point to the color
                 int colour_position = colours_contains(colour);
-                // this color does not exist, create a new color and binds it to the current point
                 if (colour_position != -1) {
+                    // create a new point and add it to an existing color
                     xy_point point;
                     point.x = x;
                     point.y = y;
@@ -127,7 +132,7 @@ int main(int e, char **args) {
                     colours[colour_position].point[colours[colour_position].length++] = point;
                     // fprintf(stderr, "exists at index: %d\n", colour_position);
                 }
-                // this color already exists and is already bound to a point,
+                // this color does not exist bind the new color to the colors and then bind the current location to the color
                 else {
 
                     // fprintf(stderr, "does not exist\n");
@@ -145,15 +150,17 @@ int main(int e, char **args) {
                         return 0;
                     }
 
-                    if (current_colours + 1 == current_max_colours) { // you have exceeded the maximum ammount of colours
+                    if (current_colours + 1 == current_max_colours) { // you have exceeded the maximum ammount of colors that is currently allocated, resize the array
                         // fprintf(stderr, "resize needed, current size: %d, new current size: %d\n", current_max_colours, current_max_colours*2);
                         current_max_colours *= 2;
                         colours = realloc(colours, sizeof(RGB_spectrum)*current_max_colours);
                     }
 
+                    // create another point
                     xy_point point;
                     point.x = x;
                     point.y = y;
+
                     colour.point = malloc(sizeof( xy_point *) * 1000000000);
                     colour.point[colour.length++] = point;
                     colours[current_colours++] = colour;

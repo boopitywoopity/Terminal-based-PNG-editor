@@ -2,6 +2,9 @@
 #include <ncurses.h>
 #define START_COLOR_INDEX 27
 
+// define a maximum possible point count for initial point creation
+#define MAX_STARTING_POINT_COUNT 128
+
 typedef struct {
         int x;
         int y;
@@ -13,6 +16,7 @@ typedef struct {
         unsigned int b;
         xy_point *point;
         unsigned int length;
+        unsigned int max_length;
         unsigned int code;
 } RGB_spectrum ;
 
