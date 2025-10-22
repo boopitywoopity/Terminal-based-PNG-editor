@@ -75,8 +75,9 @@ int main(int e, char **args) {
     // fprintf(stderr, "test 0\n");
 
     // these are user defined colours for drawing
+    // the user can only define 10 colors (for now might change later)
     user_colours = malloc(sizeof( point_w_color) * 10);
-    for (int user_clr_pos = 0; user_clr_pos < 10; user_clr_pos++) {
+    for (int user_clr_pos = 0; user_clr_pos < 10; user_clr_pos++) { // define them all as black by default
         user_colours[user_clr_pos].r = 0;
         user_colours[user_clr_pos].g = 0;
         user_colours[user_clr_pos].b = 0;
@@ -85,8 +86,9 @@ int main(int e, char **args) {
 
     colours = malloc(sizeof(RGB_spectrum) * current_max_colours);
     // total_image = malloc(sizeof( point_w_color) * height * width);
-    total_image = malloc(sizeof( point_w_color) * height * (width + 1));
-    if (total_image == NULL) {
+    total_image = malloc(sizeof(point_w_color *) * (height+1));
+
+    if (total_image == NULL) { // there was a failur to allocate enough memory for the total image
         endwin();
         printf("There was an issue allocating memory for the total image\n");
         return 0;
@@ -94,7 +96,7 @@ int main(int e, char **args) {
     // fprintf(stderr, "test 2\n");
 
     for (int y = 0; y < height; y++) {
-        total_image[y] = malloc(sizeof( point_w_color *) * (width+1)); // alocates the memory per line
+        total_image[y] = malloc(sizeof(point_w_color) * (width+1)); // alocates the memory per line
         // total_image[y] = malloc(sizeof( point_w_color *) * 400000); // alocates the memory per line
         for (int x = 0; x < width; x++) {
             int index = (y * width + x) * 4;
