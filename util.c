@@ -34,17 +34,17 @@ int y_buffer = 0;
 int loop_count = 1;
 int loop_input_assigned = 0;
 
-// This contains all colors in the image, each colour can be bound to multiple points
-RGB_spectrum *colours;
-unsigned int current_colours = 0;
-unsigned int current_max_colours = 1000;
-unsigned int colour_index = START_COLOR_INDEX;
+// This contains all colors in the image, each color can be bound to multiple points
+RGB_spectrum *colors;
+unsigned int current_colors = 0;
+unsigned int current_max_colors = 1000;
+unsigned int color_index = START_COLOR_INDEX;
 
 int pixel_ratio = 1;
 point_w_color **total_image;
 
-int current_colour = -1;
-point_w_color *user_colours;
+int current_color = -1;
+point_w_color *user_colors;
 
 #include <limits.h>
 // Define the maximum range of your long integers
@@ -111,9 +111,9 @@ int in_range(int start,int end,int value){
         return 0;
 }
 
-int colours_contains(RGB_spectrum colour){
-        for (int i=0;i<current_colours;i++){
-                if (colours[i].r == colour.r && colours[i].g == colour.g && colours[i].b == colour.b){
+int colors_contains(RGB_spectrum color){
+        for (int i=0;i<current_colors;i++){
+                if (colors[i].r == color.r && colors[i].g == color.g && colors[i].b == color.b){
                         return i;
                 }
         }

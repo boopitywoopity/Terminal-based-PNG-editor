@@ -9,10 +9,10 @@
 #include "lib/stb_image.h"
 
 void select_from_image(unsigned int *x, unsigned int *y, int width, int height);
-void load_colours_select( xy_point *points, int point_num, int width,
+void load_colors_select( xy_point *points, int point_num, int width,
                          int height);
 
-void load_colours_select_fill(int init_y, int init_x, int range_y, int range_x,
+void load_colors_select_fill(int init_y, int init_x, int range_y, int range_x,
                               int width, int height);
 void select_fill_from_image(unsigned int *x, unsigned int *y, int width,
                             int height);
@@ -23,9 +23,9 @@ void generate_colors_from_pixel_ratio(unsigned int *y, unsigned int *x,
 void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                char input, int *quit);
 void create_window(int height, int width);
-int load_colours(int width, int height);
+int load_colors(int width, int height);
 
-// example of how to make colour pairs in case I forget...
+// example of how to make color pairs in case I forget...
 /* init_extended_color(pair_index,r*1000/255,g*1000/255,b*1000/255); */
 /* init_extended_pair(pair_index,pair_index,COLOR_BLACK); */
 // compile with flag --enable-ext-colors
@@ -55,7 +55,7 @@ int main(int e, char **args) {
     // verify compatibility
     if (has_colors() == FALSE) {
         endwin();
-        printf("Your terminal does not support colours\n");
+        printf("Your terminal does not support colors\n");
         return 0;
     }
 
@@ -69,22 +69,22 @@ int main(int e, char **args) {
 
     if (can_change_color() == FALSE) {
         endwin();
-        printf("Your terminal does not support changing colours\n");
+        printf("Your terminal does not support changing colors\n");
         return 0;
     }
     // fprintf(stderr, "test 0\n");
 
-    // these are user defined colours for drawing
+    // these are user defined colors for drawing
     // the user can only define 10 colors (for now might change later)
-    user_colours = malloc(sizeof( point_w_color) * 10);
+    user_colors = malloc(sizeof( point_w_color) * 10);
     for (int user_clr_pos = 0; user_clr_pos < 10; user_clr_pos++) { // define them all as black by default
-        user_colours[user_clr_pos].r = 0;
-        user_colours[user_clr_pos].g = 0;
-        user_colours[user_clr_pos].b = 0;
+        user_colors[user_clr_pos].r = 0;
+        user_colors[user_clr_pos].g = 0;
+        user_colors[user_clr_pos].b = 0;
     }
     // fprintf(stderr, "test 1\n");
 
-    colours = malloc(sizeof(RGB_spectrum) * current_max_colours);
+    colors = malloc(sizeof(RGB_spectrum) * current_max_colors);
 
     total_image = malloc(sizeof(point_w_color *) * (height+1));
     if (total_image == NULL) { // there was a failur to allocate enough memory for the total image
@@ -109,51 +109,51 @@ int main(int e, char **args) {
             // this makes sure the alpha (transparency) is not set to 0 which
             // would make the pixel invisible
             if (image[index + 3] != 0) {
-                // fprintf(stderr, "current_colours: %d\n", current_colours);
+                // fprintf(stderr, "current_colors: %d\n", current_colors);
 
                 // create a new color, if the color already exists just ignore this and use the existing one, otherwise use it
                 // a better way to do this might be to hash the rgb values and then look to see if it exists
-                RGB_spectrum colour;
-                colour.r = image[index];
-                colour.g = image[index + 1];
-                colour.b = image[index + 2];
-                colour.length = 0;
+                RGB_spectrum color;
+                color.r = image[index];
+                color.g = image[index + 1];
+                color.b = image[index + 2];
+                color.length = 0;
 
-                // fprintf(stderr, "colour: (%d, %d, %d) ", colour.r, colour.g, colour.b);
+                // fprintf(stderr, "color: (%d, %d, %d) ", color.r, color.g, color.b);
 
                 // this color already exists, bind the point to the color
-                int colour_position = colours_contains(colour);
-                if (colour_position != -1) {
+                int color_position = colors_contains(color);
+                if (color_position != -1) {
                     // create a new point and add it to an existing color
                     xy_point point;
                     point.x = x;
                     point.y = y;
                     // this sets the
-                    colours[colour_position].point[colours[colour_position].length++] = point;
-                    // fprintf(stderr, "exists at index: %d\n", colour_position);
+                    colors[color_position].point[colors[color_position].length++] = point;
+                    // fprintf(stderr, "exists at index: %d\n", color_position);
                 }
                 // this color does not exist bind the new color to the colors and then bind the current location to the color
                 else {
 
                     // fprintf(stderr, "does not exist\n");
 
-                    if (current_colours+1 == INT_MAX){ // you have too many colours, kill the program
+                    if (current_colors+1 == INT_MAX){ // you have too many colors, kill the program
                         endwin();
                         stbi_image_free(image);
-                        // Free all the colours
-                        for (int i = 0; i < current_colours; i++) {
-                            free(colours[i].point);
+                        // Free all the colors
+                        for (int i = 0; i < current_colors; i++) {
+                            free(colors[i].point);
                         }
-                        free(colours);
+                        free(colors);
                         free(total_image);
-                        printf("The image you are attempting to load has esceeded the maximum ammount of colours available\n");
+                        printf("The image you are attempting to load has esceeded the maximum ammount of colors available\n");
                         return 0;
                     }
 
-                    if (current_colours + 1 == current_max_colours) { // you have exceeded the maximum ammount of colors that is currently allocated, resize the array
-                        // fprintf(stderr, "resize needed, current size: %d, new current size: %d\n", current_max_colours, current_max_colours*2);
-                        current_max_colours *= 2;
-                        colours = realloc(colours, sizeof(RGB_spectrum)*current_max_colours);
+                    if (current_colors + 1 == current_max_colors) { // you have exceeded the maximum ammount of colors that is currently allocated, resize the array
+                        // fprintf(stderr, "resize needed, current size: %d, new current size: %d\n", current_max_colors, current_max_colors*2);
+                        current_max_colors *= 2;
+                        colors = realloc(colors, sizeof(RGB_spectrum)*current_max_colors);
                     }
 
                     // create another point
@@ -161,16 +161,16 @@ int main(int e, char **args) {
                     point.x = x;
                     point.y = y;
 
-                    colour.point = malloc(sizeof( xy_point *) * 1000000000);
-                    colour.point[colour.length++] = point;
-                    colours[current_colours++] = colour;
+                    color.point = malloc(sizeof( xy_point *) * 1000000000);
+                    color.point[color.length++] = point;
+                    colors[current_colors++] = color;
 
                 }
             }
         }
     }
 
-    load_colours(width, height);
+    load_colors(width, height);
     unsigned int curx = 0;
     unsigned int cury = 0;
     curs_set(2);
@@ -187,16 +187,16 @@ int main(int e, char **args) {
 
     endwin();
     stbi_image_free(image); // the following lines of code just free items
-    for (int i = 0; i < current_colours; i++) {
-        free(colours[i].point);
+    for (int i = 0; i < current_colors; i++) {
+        free(colors[i].point);
     }
 
-    free(user_colours);
-    free(colours);
+    free(user_colors);
+    free(colors);
     free(total_image);
 
-    printf("Colour count at program stop: %d\n", current_colours);
-    printf("'Colours' size at program stop: %d\n", current_max_colours);
+    printf("Colour count at program stop: %d\n", current_colors);
+    printf("'Colours' size at program stop: %d\n", current_max_colors);
     return 0;
 }
 void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
@@ -220,7 +220,7 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                     x_buffer -= 1;
                 }
             }
-            load_colours(*width, *height);
+            load_colors(*width, *height);
             break;
         case 'j':
             for (int i = 0; i < loop_count && i < *height / pixel_ratio; i++) {
@@ -230,7 +230,7 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                     y_buffer += 1;
                 }
             }
-            load_colours(*width, *height);
+            load_colors(*width, *height);
             break;
         case 'k':
             for (int i = 0; i < loop_count; i++) {
@@ -240,7 +240,7 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                     y_buffer -= 1;
                 }
             }
-            load_colours(*width, *height);
+            load_colors(*width, *height);
             break;
         case 'l':
             for (int i = 0; i < loop_count && i < *width / pixel_ratio; i++) {
@@ -250,30 +250,30 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                     x_buffer += 1;
                 }
             }
-            load_colours(*width, *height);
+            load_colors(*width, *height);
             break;
         case 'd':
-            if (current_colour == -1)
+            if (current_color == -1)
                 break;
-            draw_at(*x, *y, *width, *height, user_colours[current_colour].r,
-                    user_colours[current_colour].g, user_colours[current_colour].b);
+            draw_at(*x, *y, *width, *height, user_colors[current_color].r,
+                    user_colors[current_color].g, user_colors[current_color].b);
             generate_colors_from_pixel_ratio(&*y, &*x, *height, *width);
-            load_colours(*width, *height);
+            load_colors(*width, *height);
             break;
         case 'c':
             cut_at(*x, *y, *width, *height);
             generate_colors_from_pixel_ratio(&*y, &*x, *height, *width);
-            load_colours(*width, *height);
+            load_colors(*width, *height);
             break;
         case 'v':
             select_fill_from_image(&*x, &*y, *width, *height);
             generate_colors_from_pixel_ratio(&*y, &*x, *height, *width);
-            load_colours(*width, *height);
+            load_colors(*width, *height);
             break;
         case 'V':
             select_from_image(&*x, &*y, *width, *height);
             generate_colors_from_pixel_ratio(&*y, &*x, *height, *width);
-            load_colours(*width, *height);
+            load_colors(*width, *height);
             break;
         case ':': // handles commands from the user
             // REMOVE WHEN ITS FINISHED
@@ -308,15 +308,15 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                     clrtoeol();
                 }
                 for (int i = 0; i < 10; i++) { // generates the colors for the user to
-                    // view the colour templates
-                    float colour_brightness =
-                        (user_colours[i].r * 0.299 + 0.587 * user_colours[i].g +
-                        0.144 * user_colours[i].b) /
+                    // view the color templates
+                    float color_brightness =
+                        (user_colors[i].r * 0.299 + 0.587 * user_colors[i].g +
+                        0.144 * user_colors[i].b) /
                         255;
-                    init_extended_color(17 + i, user_colours[i].r * 1000 / 255,
-                               user_colours[i].g * 1000 / 255,
-                               user_colours[i].b * 1000 / 255);
-                    if (colour_brightness < 0.5) {
+                    init_extended_color(17 + i, user_colors[i].r * 1000 / 255,
+                               user_colors[i].g * 1000 / 255,
+                               user_colors[i].b * 1000 / 255);
+                    if (color_brightness < 0.5) {
                         init_extended_pair(17 + i, COLOR_WHITE, 17 + i);
                     } else {
                         init_extended_pair(17 + i, COLOR_BLACK, 17 + i);
@@ -327,7 +327,7 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                 }
                 move(LINES - 1, 0);
                 clrtoeol();
-                char *colour_command = malloc(sizeof(char) * 100);
+                char *color_command = malloc(sizeof(char) * 100);
                 int col_cmd_len = 0;
                 char col_input;
                 int cmd_selected_color = -1; // this is the selected color that the user
@@ -345,23 +345,23 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                                 mvaddch(LINES - 1, 0, ' ');
                                 move(LINES - 1, 0);
                             } else {
-                                colour_command[col_cmd_len--] = '\0';
+                                color_command[col_cmd_len--] = '\0';
                                 mvaddch(LINES - 1, col_cmd_len, ' ');
                                 move(LINES - 1, col_cmd_len);
                             }
                         } else {
-                            colour_command[col_cmd_len++] = col_input;
+                            color_command[col_cmd_len++] = col_input;
                             addch(col_input);
                         }
                     }
                 }
-                if (colour_command[col_cmd_len] != '\0') {
-                    colour_command[col_cmd_len] = '\0';
+                if (color_command[col_cmd_len] != '\0') {
+                    color_command[col_cmd_len] = '\0';
                 }
                 if (col_input != 27 && cmd_selected_color != -1) {
-                    if (strcmp(colour_command, "-use") == 0) {
-                        current_colour = cmd_selected_color;
-                    } else if (strcmp(colour_command, "-set") == 0) {
+                    if (strcmp(color_command, "-use") == 0) {
+                        current_color = cmd_selected_color;
+                    } else if (strcmp(color_command, "-set") == 0) {
                         int accept = 0;
                         while (!accept) {
                             int r = 0;
@@ -443,10 +443,10 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                                 if (b > 255) {
                                     b = 255;
                                 }
-                                float colour_brightness =
+                                float color_brightness =
                                     (r * 0.299 + 0.587 * g + 0.144 * b) / 255;
                                 init_extended_color(16, r * 1000 / 255, g * 1000 / 255, b * 1000 / 255);
-                                if (colour_brightness < 0.5) {
+                                if (color_brightness < 0.5) {
                                     init_extended_pair(16, COLOR_WHITE, 16);
                                 } else {
                                     init_extended_pair(16, COLOR_BLACK, 16);
@@ -458,10 +458,10 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                                 while ((choice = getch()) != 'y' && choice != 'n');
                                 if (choice == 'y') {
                                     accept = 1;
-                                    user_colours[cmd_selected_color].r = r;
-                                    user_colours[cmd_selected_color].g = g;
-                                    user_colours[cmd_selected_color].b = b;
-                                    user_colours[cmd_selected_color].a = 255;
+                                    user_colors[cmd_selected_color].r = r;
+                                    user_colors[cmd_selected_color].g = g;
+                                    user_colors[cmd_selected_color].b = b;
+                                    user_colors[cmd_selected_color].a = 255;
                                 }
                             }
                         }
@@ -469,11 +469,11 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                         move(LINES - 1, 0);
                         clrtoeol();
                         printw("Invalid input the command you gave in was %d%s",
-                               cmd_selected_color, colour_command);
+                               cmd_selected_color, color_command);
                         getch();
                     }
                 }
-                free(colour_command);
+                free(color_command);
             } else if (compare_at(command, "cr",
                                   2)) { // this will be used to crop from the file
                 // DONT FORGET TO WRITE IT
@@ -500,7 +500,7 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                         pixel_ratio = total;
                         printw("Pixel ratio =%d", pixel_ratio);
                         generate_colors_from_pixel_ratio(&*y, &*x, *height, *width);
-                        load_colours(*width, *height);
+                        load_colors(*width, *height);
                     } else {
                         mvaddstr(LINES - 1, 0, "Invalid input (press any key to continue)");
                         getch();
@@ -533,14 +533,14 @@ void generate_colors_from_pixel_ratio(unsigned int *y, unsigned int *x,
     }
     int y_pos = 0;
     int x_pos = 0;
-    for (int i = 0; i < current_colours; i++) {
-        free(colours[i].point);
+    for (int i = 0; i < current_colors; i++) {
+        free(colors[i].point);
     }
 
-    free(colours);
-    colours = malloc(sizeof(RGB_spectrum) * current_max_colours);
-    colour_index = START_COLOR_INDEX;
-    current_colours = 0;
+    free(colors);
+    colors = malloc(sizeof(RGB_spectrum) * current_max_colors);
+    color_index = START_COLOR_INDEX;
+    current_colors = 0;
     for (int y = 0; y < height; y += pixel_ratio) {
         x_pos = 0;
         for (int x = 0; x < width; x += pixel_ratio) {
@@ -559,26 +559,26 @@ void generate_colors_from_pixel_ratio(unsigned int *y, unsigned int *x,
 
             if (a_total != 0) {
                 float p2 = pixel_ratio * pixel_ratio;
-                RGB_spectrum colour;
-                colour.r = r_total / p2;
-                colour.g = g_total / p2;
-                colour.b = b_total / p2;
-                colour.length = 0;
-                int colour_position = colours_contains(colour);
-                if (colour_position != -1) {
-                    colours[colour_position].point[colours[colour_position].length].x =
+                RGB_spectrum color;
+                color.r = r_total / p2;
+                color.g = g_total / p2;
+                color.b = b_total / p2;
+                color.length = 0;
+                int color_position = colors_contains(color);
+                if (color_position != -1) {
+                    colors[color_position].point[colors[color_position].length].x =
                         x_pos;
-                    colours[colour_position].point[colours[colour_position].length].y =
+                    colors[color_position].point[colors[color_position].length].y =
                         y_pos;
-                    colours[colour_position].length += 1;
+                    colors[color_position].length += 1;
                 } else {
-                    colour.point = malloc(sizeof( xy_point *) * 100000000);
-                    colour.point[0].x = x_pos;
-                    colour.point[0].y = y_pos;
-                    colour.length += 1;
-                    colours[current_colours] = colour;
-                    colours[current_colours].code = colour_index;
-                    current_colours += 1;
+                    color.point = malloc(sizeof( xy_point *) * 100000000);
+                    color.point[0].x = x_pos;
+                    color.point[0].y = y_pos;
+                    color.length += 1;
+                    colors[current_colors] = color;
+                    colors[current_colors].code = color_index;
+                    current_colors += 1;
                 }
             } else {
             }
@@ -593,7 +593,7 @@ void select_from_image(unsigned int *x, unsigned int *y, int width,
     coord[0].x = *x + x_buffer;
     coord[0].y = *y + y_buffer;
     int coord_count = 1;
-    load_colours_select(coord, coord_count, width, height);
+    load_colors_select(coord, coord_count, width, height);
     char input;
     int run = 1;
     while (run) {
@@ -631,7 +631,7 @@ void select_from_image(unsigned int *x, unsigned int *y, int width,
                         coord_count += 1;
                     }
                 }
-                load_colours_select(coord, coord_count, width, height);
+                load_colors_select(coord, coord_count, width, height);
                 loop_count = 1;
                 loop_input_assigned = 0;
                 break;
@@ -649,7 +649,7 @@ void select_from_image(unsigned int *x, unsigned int *y, int width,
                         coord_count += 1;
                     }
                 }
-                load_colours_select(coord, coord_count, width, height);
+                load_colors_select(coord, coord_count, width, height);
                 loop_count = 1;
                 loop_input_assigned = 0;
                 break;
@@ -668,7 +668,7 @@ void select_from_image(unsigned int *x, unsigned int *y, int width,
                         coord_count += 1;
                     }
                 }
-                load_colours_select(coord, coord_count, width, height);
+                load_colors_select(coord, coord_count, width, height);
                 loop_count = 1;
                 loop_input_assigned = 0;
                 break;
@@ -686,7 +686,7 @@ void select_from_image(unsigned int *x, unsigned int *y, int width,
                         coord_count += 1;
                     }
                 }
-                load_colours_select(coord, coord_count, width, height);
+                load_colors_select(coord, coord_count, width, height);
                 loop_count = 1;
                 loop_input_assigned = 0;
                 break;
@@ -699,12 +699,12 @@ void select_from_image(unsigned int *x, unsigned int *y, int width,
                 run = 0;
                 break;
             case 'd':
-                for (int i = 0; i < coord_count && current_colour != -1; i++) {
+                for (int i = 0; i < coord_count && current_color != -1; i++) {
                     int x = coord[i].x;
                     int y = coord[i].y;
                     draw_at(x - x_buffer, y - y_buffer, height, width,
-                            user_colours[current_colour].r, user_colours[current_colour].g,
-                            user_colours[current_colour].b);
+                            user_colors[current_color].r, user_colors[current_color].g,
+                            user_colors[current_color].b);
                 }
                 loop_input_assigned = 0;
                 loop_count = 0;
@@ -715,7 +715,7 @@ void select_from_image(unsigned int *x, unsigned int *y, int width,
     free(coord);
 }
 
-void load_colours_select( xy_point *points, int point_num, int width,
+void load_colors_select( xy_point *points, int point_num, int width,
                          int height) {
 
     move(0, 0);
@@ -726,15 +726,15 @@ void load_colours_select( xy_point *points, int point_num, int width,
         }
     }
     attroff(A_NORMAL);
-    for (int i = 0; i < current_colours; i++) {
-        colours[i].code = colour_index;
-        init_extended_color(colour_index, colours[i].r * 1000 / 255,
-                            colours[i].g * 1000 / 255, colours[i].b * 1000 / 255);
-        init_extended_pair(colour_index, COLOR_BLACK, colour_index);
-        attron(COLOR_PAIR(colour_index));
-        for (int n = 0; n < colours[i].length; n++) {
-            int cur_y = colours[i].point[n].y;
-            int cur_x = colours[i].point[n].x;
+    for (int i = 0; i < current_colors; i++) {
+        colors[i].code = color_index;
+        init_extended_color(color_index, colors[i].r * 1000 / 255,
+                            colors[i].g * 1000 / 255, colors[i].b * 1000 / 255);
+        init_extended_pair(color_index, COLOR_BLACK, color_index);
+        attron(COLOR_PAIR(color_index));
+        for (int n = 0; n < colors[i].length; n++) {
+            int cur_y = colors[i].point[n].y;
+            int cur_x = colors[i].point[n].x;
             if (cur_x - x_buffer < COLS - 1 && cur_y - y_buffer < LINES - 2) {
                 if (xy_point_in(points, point_num, cur_x, cur_y)) {
                     mvaddch(cur_y - y_buffer, cur_x - x_buffer, '0');
@@ -744,10 +744,10 @@ void load_colours_select( xy_point *points, int point_num, int width,
                 }
             }
         }
-        attroff(COLOR_PAIR(colour_index));
-        colour_index += 1;
+        attroff(COLOR_PAIR(color_index));
+        color_index += 1;
     }
-    colour_index = START_COLOR_INDEX;
+    color_index = START_COLOR_INDEX;
     refresh();
 }
 void select_fill_from_image(unsigned int *x, unsigned int *y, int width,
@@ -760,7 +760,7 @@ void select_fill_from_image(unsigned int *x, unsigned int *y, int width,
     int run = 1;
     char input;
 
-    load_colours_select_fill(init_y, init_x, range_y, range_x, width, height);
+    load_colors_select_fill(init_y, init_x, range_y, range_x, width, height);
 
     while (run) {
         move(*y, *x);
@@ -796,7 +796,7 @@ void select_fill_from_image(unsigned int *x, unsigned int *y, int width,
                 }
                 loop_input_assigned = 0;
                 loop_count = 1;
-                load_colours_select_fill(init_y, init_x, range_y, range_x, width, height);
+                load_colors_select_fill(init_y, init_x, range_y, range_x, width, height);
                 break;
             case 'j':
                 for (int i = 0; i < loop_count && i < height; i++) {
@@ -811,7 +811,7 @@ void select_fill_from_image(unsigned int *x, unsigned int *y, int width,
                 }
                 loop_input_assigned = 0;
                 loop_count = 1;
-                load_colours_select_fill(init_y, init_x, range_y, range_x, width, height);
+                load_colors_select_fill(init_y, init_x, range_y, range_x, width, height);
                 break;
             case 'k':
                 for (int i = 0; i < loop_count; i++) {
@@ -825,7 +825,7 @@ void select_fill_from_image(unsigned int *x, unsigned int *y, int width,
                 }
                 loop_input_assigned = 0;
                 loop_count = 1;
-                load_colours_select_fill(init_y, init_x, range_y, range_x, width, height);
+                load_colors_select_fill(init_y, init_x, range_y, range_x, width, height);
                 break;
             case 'l':
                 for (int i = 0; i < loop_count && i < width; i++) {
@@ -839,7 +839,7 @@ void select_fill_from_image(unsigned int *x, unsigned int *y, int width,
                 }
                 loop_input_assigned = 0;
                 loop_count = 1;
-                load_colours_select_fill(init_y, init_x, range_y, range_x, width, height);
+                load_colors_select_fill(init_y, init_x, range_y, range_x, width, height);
                 break;
             case 'c':
                 if (true) {
@@ -884,13 +884,13 @@ void select_fill_from_image(unsigned int *x, unsigned int *y, int width,
                     tmp_init_x1 = x_range1;
                     x_range1 = tmp_x;
                 }
-                for (int y_pos = tmp_init_y1; y_pos <= y_range1 && current_colour != -1;
+                for (int y_pos = tmp_init_y1; y_pos <= y_range1 && current_color != -1;
                 y_pos++) {
                     for (int x_pos = tmp_init_x1; x_pos <= x_range1; x_pos++) {
                         draw_at(x_pos - x_buffer, y_pos - y_buffer, width, height,
-                                user_colours[current_colour].r,
-                                user_colours[current_colour].g,
-                                user_colours[current_colour].b);
+                                user_colors[current_color].r,
+                                user_colors[current_color].g,
+                                user_colors[current_color].b);
                     }
                 }
                 loop_input_assigned = 0;
@@ -902,7 +902,7 @@ void select_fill_from_image(unsigned int *x, unsigned int *y, int width,
     }
 }
 
-void load_colours_select_fill(int init_y, int init_x, int range_y, int range_x,
+void load_colors_select_fill(int init_y, int init_x, int range_y, int range_x,
                               int width, int height) {
     move(0, 0);
     attron(A_NORMAL);
@@ -925,15 +925,15 @@ void load_colours_select_fill(int init_y, int init_x, int range_y, int range_x,
         init_x = x_range;
         x_range = tmp_x;
     }
-    for (int i = 0; i < current_colours; i++) {
-        colours[i].code = colour_index;
-        init_extended_color(colour_index, colours[i].r * 1000 / 255,
-                   colours[i].g * 1000 / 255, colours[i].b * 1000 / 255);
-        init_extended_pair(colour_index, COLOR_BLACK, colour_index);
-        attron(COLOR_PAIR(colour_index));
-        for (int n = 0; n < colours[i].length; n++) {
-            int cur_y = colours[i].point[n].y;
-            int cur_x = colours[i].point[n].x;
+    for (int i = 0; i < current_colors; i++) {
+        colors[i].code = color_index;
+        init_extended_color(color_index, colors[i].r * 1000 / 255,
+                   colors[i].g * 1000 / 255, colors[i].b * 1000 / 255);
+        init_extended_pair(color_index, COLOR_BLACK, color_index);
+        attron(COLOR_PAIR(color_index));
+        for (int n = 0; n < colors[i].length; n++) {
+            int cur_y = colors[i].point[n].y;
+            int cur_x = colors[i].point[n].x;
             if ((cur_y >= y_buffer && cur_y < LINES - 2 + y_buffer) &&
                 (cur_x >= x_buffer && cur_x < COLS - 1 + x_buffer) &&
                 cur_x - x_buffer < COLS - 1 && cur_y - y_buffer < LINES - 2) {
@@ -945,13 +945,13 @@ void load_colours_select_fill(int init_y, int init_x, int range_y, int range_x,
                 }
             }
         }
-        attroff(COLOR_PAIR(colour_index));
-        colour_index += 1;
+        attroff(COLOR_PAIR(color_index));
+        color_index += 1;
     }
-    colour_index = START_COLOR_INDEX;
+    color_index = START_COLOR_INDEX;
     refresh();
 }
-int load_colours(int width, int height) {
+int load_colors(int width, int height) {
     move(0, 0);
     attron(A_NORMAL);
     for (int y = 0; y < LINES - 2; y++) {
@@ -960,23 +960,23 @@ int load_colours(int width, int height) {
         }
     }
     attroff(A_NORMAL);
-    for (int i = 0; i < current_colours; i++) {
-        colours[i].code = colour_index;
-        init_extended_color(colour_index, colours[i].r * 1000 / 255,
-                            colours[i].g * 1000 / 255, colours[i].b * 1000 / 255);
-        init_extended_pair(colour_index, COLOR_BLACK, colour_index);
-        attron(COLOR_PAIR(colour_index));
-        for (int n = 0; n < colours[i].length; n++) {
-            int cur_y = colours[i].point[n].y;
-            int cur_x = colours[i].point[n].x;
+    for (int i = 0; i < current_colors; i++) {
+        colors[i].code = color_index;
+        init_extended_color(color_index, colors[i].r * 1000 / 255,
+                            colors[i].g * 1000 / 255, colors[i].b * 1000 / 255);
+        init_extended_pair(color_index, COLOR_BLACK, color_index);
+        attron(COLOR_PAIR(color_index));
+        for (int n = 0; n < colors[i].length; n++) {
+            int cur_y = colors[i].point[n].y;
+            int cur_x = colors[i].point[n].x;
             if ((cur_y >= y_buffer && cur_y - y_buffer < LINES - 2) &&
                 (cur_x >= x_buffer && cur_x - x_buffer < COLS - 1))
                 mvaddch(cur_y - y_buffer, cur_x - x_buffer, ' ');
         }
-        attroff(COLOR_PAIR(colour_index));
-        colour_index += 1;
+        attroff(COLOR_PAIR(color_index));
+        color_index += 1;
     }
-    colour_index = START_COLOR_INDEX;
+    color_index = START_COLOR_INDEX;
     refresh();
     return 0;
 }
