@@ -1,12 +1,22 @@
-#include "util.c"
-#include <curses.h>
 #include <ncurses.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "lib/stb_image.h"
+#include "util.h"
+#include "globals.h"
+
+// TODO
+// 1. Refactor main such that it conforms with the standard
+// 2. Refactor the key_press function such that it's not a piece of shit
+// 3. Implement regex to the key_press for checking user input
+// 4. Fix potential memory leaks
+// 5. Spend time understanding what some parts of the code do and how/why (been a couple years since I originally wrote this some parts of this are weird)
+
+
 
 void select_from_image(unsigned int *x, unsigned int *y, int width, int height);
 void load_colors_select( xy_point *points, int point_num, int width,
@@ -42,9 +52,6 @@ int main(int e, char **args) {
     int width, height, channels;
     unsigned char *image = stbi_load(filename, &width, &height, &channels, 4);
 
-    fprintf(stderr, "channels: %d\n", channels);
-    fprintf(stderr, "width: %d\nheight: %d\n", width, height);
-
     if (!image) {
         printf("There was an issue opening the image\n");
         return 0;
@@ -72,7 +79,6 @@ int main(int e, char **args) {
         printf("Your terminal does not support changing colors\n");
         return 0;
     }
-    // fprintf(stderr, "test 0\n");
 
     // these are user defined colors for drawing
     // the user can only define 10 colors (for now might change later)
@@ -82,99 +88,16 @@ int main(int e, char **args) {
         user_colors[user_clr_pos].g = 0;
         user_colors[user_clr_pos].b = 0;
     }
-    // fprintf(stderr, "test 1\n");
 
-    colors = malloc(sizeof(RGB_spectrum) * current_max_colors);
-
-    total_image = malloc(sizeof(point_w_color *) * (height+1));
-    if (total_image == NULL) { // there was a failur to allocate enough memory for the total image
-        endwin();
-        printf("There was an issue allocating memory for the total image\n");
-        return 0;
-    }
-
-    // fprintf(stderr, "test 2\n");
-
-    for (int y = 0; y < height; y++) {
-        total_image[y] = malloc(sizeof(point_w_color) * (width+1)); // alocates the memory per line
-        // total_image[y] = malloc(sizeof( point_w_color *) * 400000); // alocates the memory per line
-        for (int x = 0; x < width; x++) {
-            int index = (y * width + x) * 4;
-            // fprintf(stderr, "current index: (%d, %d), %d\n", x, y, index);
-            total_image[y][x].r = image[index]; // makes the variables for the point
-            total_image[y][x].g = image[index + 1];
-            total_image[y][x].b = image[index + 2];
-            total_image[y][x].a = image[index + 3];
-
-            // this makes sure the alpha (transparency) is not set to 0 which
-            // would make the pixel invisible
-            if (image[index + 3] != 0) {
-                // fprintf(stderr, "current_colors: %d\n", current_colors);
-
-                // create a new color, if the color already exists just ignore this and use the existing one, otherwise use it
-                // a better way to do this might be to hash the rgb values and then look to see if it exists
-                RGB_spectrum color;
-                color.r = image[index];
-                color.g = image[index + 1];
-                color.b = image[index + 2];
-                color.length = 0;
-
-                // fprintf(stderr, "color: (%d, %d, %d) ", color.r, color.g, color.b);
-
-                // this color already exists, bind the point to the color
-                int color_position = colors_contains(color);
-                if (color_position != -1) {
-                    // create a new point and add it to an existing color
-                    xy_point point;
-                    point.x = x;
-                    point.y = y;
-                    // this sets the
-                    colors[color_position].point[colors[color_position].length++] = point;
-                    // fprintf(stderr, "exists at index: %d\n", color_position);
-                }
-                // this color does not exist bind the new color to the colors and then bind the current location to the color
-                else {
-
-                    // fprintf(stderr, "does not exist\n");
-
-                    if (current_colors+1 == INT_MAX){ // you have too many colors, kill the program
-                        endwin();
-                        stbi_image_free(image);
-                        // Free all the colors
-                        for (int i = 0; i < current_colors; i++) {
-                            free(colors[i].point);
-                        }
-                        free(colors);
-                        free(total_image);
-                        printf("The image you are attempting to load has esceeded the maximum ammount of colors available\n");
-                        return 0;
-                    }
-
-                    if (current_colors + 1 == current_max_colors) { // you have exceeded the maximum ammount of colors that is currently allocated, resize the array
-                        // fprintf(stderr, "resize needed, current size: %d, new current size: %d\n", current_max_colors, current_max_colors*2);
-                        current_max_colors *= 2;
-                        colors = realloc(colors, sizeof(RGB_spectrum)*current_max_colors);
-                    }
-
-                    // create another point
-                    xy_point point;
-                    point.x = x;
-                    point.y = y;
-
-                    color.point = malloc(sizeof( xy_point *) * 1000000000);
-                    color.point[color.length++] = point;
-                    colors[current_colors++] = color;
-
-                }
-            }
-        }
-    }
-
+    load_image(image, width, height);
     load_colors(width, height);
+
     unsigned int curx = 0;
     unsigned int cury = 0;
+
     curs_set(2);
-    char ch;
+
+    char ch; // the input provided by the user
     int quit = 0;
 
     // this the main loop
@@ -185,20 +108,15 @@ int main(int e, char **args) {
         key_press(&curx, &cury, &width, &height, ch, &quit);
     }
 
+
+
+    // cleanup
     endwin();
-    stbi_image_free(image); // the following lines of code just free items
-    for (int i = 0; i < current_colors; i++) {
-        free(colors[i].point);
-    }
-
-    free(user_colors);
-    free(colors);
-    free(total_image);
-
-    printf("Colour count at program stop: %d\n", current_colors);
-    printf("'Colours' size at program stop: %d\n", current_max_colors);
+    stbi_image_free(image);
+    free_globals(height);
     return 0;
 }
+
 void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                char input, int *quit) {
     if (input >= '0' && input <= '9') {
@@ -302,7 +220,8 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
 
             if (compare_at(command, "q", 1)) {
                 *quit = 1;
-            } else if (compare_at(command, "col", 3)) {
+            }
+            else if (compare_at(command, "col", 3)) {
                 for (int i = LINES - 3; i < LINES - 1; i++) {
                     move(i, 0);
                     clrtoeol();
@@ -489,7 +408,7 @@ void key_press(unsigned int *x, unsigned int *y, int *width, int *height,
                 }
                 total *= negative;
 
-            } else if (compare_at(command, "pr", 2)) { // CREATES THE PIXEL RATIO
+            } else if (compare_at(command, "pr", 2)) { // create the pixel ratio
                 int total = 0;
                 for (int pos = 2; pos < command_len; pos++) {
                     total = total * 10;
@@ -572,7 +491,8 @@ void generate_colors_from_pixel_ratio(unsigned int *y, unsigned int *x,
                         y_pos;
                     colors[color_position].length += 1;
                 } else {
-                    color.point = malloc(sizeof( xy_point *) * 100000000);
+                    // TODO Fix this part of the code such that it doesnt use arbitrary size declaration
+                    color.point = malloc(sizeof(xy_point) * 100000000);
                     color.point[0].x = x_pos;
                     color.point[0].y = y_pos;
                     color.length += 1;
@@ -609,7 +529,7 @@ void select_from_image(unsigned int *x, unsigned int *y, int width,
             }
         }
         switch (input) {
-            case 27:
+            case 27: // escape, stop selecting from the image
                 if (loop_input_assigned) {
                     loop_count = 1;
                     loop_input_assigned = 0;
