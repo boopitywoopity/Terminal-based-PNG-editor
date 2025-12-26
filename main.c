@@ -17,7 +17,6 @@
 // 6. Rewrite the way colors are done, each point are a hash that points to a value in a tree (avl tree?)
 
 
-
 void select_from_image(image_container *img, program_info *info, unsigned int *x, unsigned int *y);
 void load_colours_select(image_container *img, xy_point *points, int point_num);
 
@@ -134,7 +133,8 @@ void key_press(image_container *img, program_info *info, unsigned int *x, unsign
             for (int i = 0; i < info->loop_count; i++) {
                 if (*x != 0) {
                     *x -= 1;
-                } else if (img->x_buffer > 0) {
+                }
+                else if (img->x_buffer > 0) {
                     img->x_buffer -= 1;
                 }
             }
@@ -154,7 +154,8 @@ void key_press(image_container *img, program_info *info, unsigned int *x, unsign
             for (int i = 0; i < info->loop_count; i++) {
                 if (*y != 0) {
                     *y -= 1;
-                } else if (img->y_buffer > 0) {
+                }
+                else if (img->y_buffer > 0) {
                     img->y_buffer -= 1;
                 }
             }
@@ -254,8 +255,7 @@ void key_press(image_container *img, program_info *info, unsigned int *x, unsign
                 // this is the selected colour that the user has chosen for the action
                 int cmd_selected_colour = -1;
 
-                while ((col_input = getch()) != '\n' && col_cmd_len != 100 &&
-                    col_input != 27) {
+                while ((col_input = getch()) != '\n' && col_cmd_len != 100 && col_input != 27) {
                     if (cmd_selected_colour == -1 && col_input >= '0' && col_input <= '9') {
                         cmd_selected_colour = col_input - '0';
                         addch(col_input);
@@ -408,8 +408,7 @@ void key_press(image_container *img, program_info *info, unsigned int *x, unsign
                 }
                 free(colour_command);
             }
-            else if (compare_at(command, "cr",
-                                2)) { // this will be used to crop from the file
+            else if (compare_at(command, "cr", 2)) { // this will be used to crop from the file
                 // DONT FORGET TO WRITE IT
                 int total = 0;
                 int negative = 1;
@@ -943,7 +942,10 @@ void load_colours_select_fill(image_container *img, int init_y, int init_x, int 
     img->colour_index = START_COLOR_INDEX;
     refresh();
 }
+
+// Load the entire image
 int load_colours(image_container *img) {
+    // TODO: rewrite this such that it's not fucking stupid
     move(0, 0);
     attron(A_NORMAL);
     for (int y = 0; y < LINES - 2; y++) {
@@ -960,9 +962,10 @@ int load_colours(image_container *img) {
         for (int n = 0; n < img->colours[i].length; n++) {
             int cur_y = img->colours[i].point[n].y;
             int cur_x = img->colours[i].point[n].x;
-            if ((cur_y >= img->y_buffer && cur_y - img->y_buffer < LINES - 2) &&
-                (cur_x >= img->x_buffer && cur_x - img->x_buffer < COLS - 1))
+            if ((cur_y >= img->y_buffer && cur_y - img->y_buffer < LINES - 2)
+                && (cur_x >= img->x_buffer && cur_x - img->x_buffer < COLS - 1)){
                 mvaddch(cur_y - img->y_buffer, cur_x - img->x_buffer, ' ');
+            }
         }
         attroff(COLOR_PAIR(img->colour_index));
         img->colour_index += 1;
