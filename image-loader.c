@@ -34,7 +34,6 @@ static image_container generate_default(const int width, const int height){
 image_container load_image(unsigned char *image, unsigned int width, unsigned int height){
     image_container img = generate_default(width, height);
 
-
     for (int y = 0; y < height; y++) {
         img.total_image[y] = malloc(sizeof(point_w_colour) * (width+1)); // alocates the memory per line
         // total_image[y] = malloc(sizeof( point_w_colour *) * 400000); // alocates the memory per line

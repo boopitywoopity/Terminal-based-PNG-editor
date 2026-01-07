@@ -73,4 +73,19 @@ int colours_contains(image_container *img, unsigned int r, unsigned int g, unsig
 image_container load_image(unsigned char *image, unsigned int width, unsigned int height);
 
 program_info generate_default_program_info(char *fname);
+
+
+// avl.c
+
+typedef struct tree_t {
+    uint32_t height;
+    uint64_t colour_code;
+    uint8_t colour[3];
+    struct tree_t *l, *r;
+} tree;
+
+bool has_color(tree **root, const uint32_t target);
+uint64_t get_colour_code(tree **root, const uint32_t target);
+void insert(tree **root, const uint32_t value);
+
 #endif // UTIL_H

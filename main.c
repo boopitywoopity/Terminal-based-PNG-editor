@@ -174,8 +174,7 @@ void key_press(image_container *img, program_info *info, unsigned int *x, unsign
         case 'd':
             if (info->current_colour == -1)
                 break;
-            draw_at(img, *x, *y, info->user_colours[info->current_colour].r,
-                    info->user_colours[info->current_colour].g, info->user_colours[info->current_colour].b);
+            draw_at(img, *x, *y, info->user_colours[info->current_colour].r, info->user_colours[info->current_colour].g, info->user_colours[info->current_colour].b);
             generate_colours_from_pixel_ratio(img, y, x);
             load_colours(img);
             break;
@@ -451,6 +450,7 @@ void key_press(image_container *img, program_info *info, unsigned int *x, unsign
     info->loop_count = 1;
     info->loop_count_assigned = false;
 }
+
 void generate_colours_from_pixel_ratio(image_container *img, unsigned int *y, unsigned int *x) {
     if (*y + img->y_buffer > img->height) {
         img->y_buffer = img->height - *y;
