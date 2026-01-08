@@ -2,7 +2,6 @@
 #include <ncurses.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 
 
@@ -212,15 +211,16 @@ int initialize_colour(tree *newnode, const uint8_t *rgb, uint64_t next_colour_co
 
 
 int update_height(tree **stack, int stack_count){
+    int first_imbalanced = -1;
     for (int i=stack_count-1; i > 0 ;i--){
         tree *node = stack[i];
         node->height += 1;
         int bf = get_bf(node->l, node->r);
-        if (bf > 1 || bf < -1){
-            return i;
+        if ((bf > 1 || bf < -1) && first_imbalanced == -1){
+            first_imbalanced = i;
         }
     }
-    return -1;
+    return first_imbalanced;
 }
 
 int get_bf(tree *l, tree *r){

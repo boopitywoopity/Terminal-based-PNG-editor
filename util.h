@@ -88,4 +88,21 @@ bool has_color(tree **root, const uint32_t target);
 uint64_t get_colour_code(tree **root, const uint32_t target);
 void insert(tree **root, const uint32_t value);
 
+// keyboard-input.c
+
+void key_press(image_container *img, program_info *info, unsigned int *x, unsigned int *y, char input, int *quit);
+
+// TODO: figure out where this should go
+
+void select_from_image(image_container *img, program_info *info, unsigned int *x, unsigned int *y);
+void load_colours_select(image_container *img, xy_point *points, int point_num);
+
+void load_colours_select_fill(image_container *img, int init_y, int init_x, int range_y, int range_x);
+void select_fill_from_image(image_container *img, program_info *info, unsigned int *x, unsigned int *y);
+
+void load_image_information(image_container *img, program_info *info, int x, int y);
+void generate_colours_from_pixel_ratio(image_container *img, unsigned int *y, unsigned int *x);
+
+WINDOW *create_window(unsigned int height, unsigned int width);
+int load_colours(image_container *img);
 #endif // UTIL_H

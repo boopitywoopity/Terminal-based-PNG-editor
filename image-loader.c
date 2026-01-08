@@ -15,7 +15,6 @@ static image_container generate_default(const int width, const int height){
         .pixel_ratio = 1,
         .colour_index = 0,
         .current_colours = 0,
-
     };
 
     img.colours = malloc(sizeof(RGB_spectrum) * img.current_max_colours);
@@ -39,7 +38,6 @@ image_container load_image(unsigned char *image, unsigned int width, unsigned in
         // total_image[y] = malloc(sizeof( point_w_colour *) * 400000); // alocates the memory per line
         for (int x = 0; x < width; x++) {
             int index = (y * width + x) * 4;
-            // fprintf(stderr, "current index: (%d, %d), %d\n", x, y, index);
             img.total_image[y][x].r = image[index]; // makes the variables for the point
             img.total_image[y][x].g = image[index + 1];
             img.total_image[y][x].b = image[index + 2];
@@ -48,12 +46,8 @@ image_container load_image(unsigned char *image, unsigned int width, unsigned in
             // this makes sure the alpha (transparency) is not set to 0 which
             // would make the pixel invisible
             if (image[index + 3] != 0) {
-                // fprintf(stderr, "current_colours: %d\n", current_colours);
-
                 // create a new colour, if the colour already exists just ignore this and use the existing one, otherwise use it
                 // a better way to do this might be to hash the rgb values and then look to see if it exists
-
-                // fprintf(stderr, "colour: (%d, %d, %d) ", colour.r, colour.g, colour.b);
 
                 // this colour already exists, bind the point to the colour
                 int colour_position = colours_contains(&img, image[index], image[index+1], image[index+2]);
@@ -69,7 +63,6 @@ image_container load_image(unsigned char *image, unsigned int width, unsigned in
                         img.colours[colour_position].point = realloc(img.colours[colour_position].point, sizeof(xy_point)*img.colours[colour_position].max_length);
                     }
                     img.colours[colour_position].point[img.colours[colour_position].length++] = point;
-                    // fprintf(stderr, "exists at index: %d\n", colour_position);
                 }
                 // this colour does not exist bind the new colour to the colours and then bind the current location to the colour
                 else {
@@ -78,7 +71,6 @@ image_container load_image(unsigned char *image, unsigned int width, unsigned in
                     colour.g = image[index + 1];
                     colour.b = image[index + 2];
                     colour.length = 0;
-                    // fprintf(stderr, "does not exist\n");
                     if (img.current_colours+1 == INT_MAX){ // you have too many colours, kill the program
                         endwin();
                         stbi_image_free(image);
@@ -95,7 +87,6 @@ image_container load_image(unsigned char *image, unsigned int width, unsigned in
                     }
 
                     if (img.current_colours == img.current_max_colours) { // you have exceeded the maximum ammount of colours that is currently allocated, resize the array
-                        // fprintf(stderr, "resize needed, current size: %d, new current size: %d\n", current_max_colours, current_max_colours*2);
                         img.current_max_colours *= 2;
                         img.colours = realloc(img.colours, sizeof(RGB_spectrum)*img.current_max_colours);
                     }
