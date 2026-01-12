@@ -36,6 +36,12 @@ typedef struct {
 
     point_w_colour *user_colours;
     int current_colour;
+
+    enum traverse_mode {
+        IMAGE_TRAVERSE = 1,
+        INDIVIDUAL_SELECT = 2,
+        BOX_SELECT = 3
+    } mode;
 } program_info;
 
 // This struct isused to facilitate passing information between functions.

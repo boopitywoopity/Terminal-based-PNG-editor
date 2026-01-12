@@ -42,7 +42,8 @@ void key_press(image_container *img, program_info *info, unsigned int *x, unsign
             for (int i = 0; i < info->loop_count && i < img->height / img->pixel_ratio; i++) {
                 if (*y + 1 < img->height / img->pixel_ratio && *y < LINES - 3) {
                     *y += 1;
-                } else if (img->y_buffer + *y + 1 < img->height / img->pixel_ratio && *y == LINES - 3) {
+                }
+                else if (img->y_buffer + *y + 1 < img->height / img->pixel_ratio && *y == LINES - 3) {
                     img->y_buffer += 1;
                 }
             }

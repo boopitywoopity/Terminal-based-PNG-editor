@@ -390,6 +390,7 @@ void load_colours_select(image_container *img, xy_point *points, int point_num) 
     img->colour_index = START_COLOR_INDEX;
     refresh();
 }
+
 void select_fill_from_image(image_container *img, program_info *info, unsigned int *x, unsigned int *y) {
     int init_y = *y + img->y_buffer;
     int init_x = *x + img->x_buffer;
@@ -591,44 +592,6 @@ void load_colours_select_fill(image_container *img, int init_y, int init_x, int 
     refresh();
 }
 
-// Load the entire image
-int load_colours(image_container *img) {
-    // TODO: rewrite this such that it's not fucking stupid
-    move(0, 0);
-    attron(A_NORMAL);
-    for (int y = 0; y < LINES - 2; y++) {
-        for (int x = 0; x < COLS - 1; x++) {
-            mvaddch(y, x, 'X');
-        }
-    }
-    attroff(A_NORMAL);
-    for (int i = 0; i < img->current_colours; i++) {
-        img->colours[i].code = img->colour_index;
-        init_extended_color(img->colour_index, img->colours[i].r * 1000 / 255, img->colours[i].g * 1000 / 255, img->colours[i].b * 1000 / 255);
-        init_extended_pair(img->colour_index, COLOR_BLACK, img->colour_index);
-        attron(COLOR_PAIR(img->colour_index));
-        for (int n = 0; n < img->colours[i].length; n++) {
-            int cur_y = img->colours[i].point[n].y;
-            int cur_x = img->colours[i].point[n].x;
-            if ((cur_y >= img->y_buffer && cur_y - img->y_buffer < LINES - 2)
-                && (cur_x >= img->x_buffer && cur_x - img->x_buffer < COLS - 1)){
-                mvaddch(cur_y - img->y_buffer, cur_x - img->x_buffer, ' ');
-            }
-        }
-        attroff(COLOR_PAIR(img->colour_index));
-        img->colour_index += 1;
-    }
-    img->colour_index = START_COLOR_INDEX;
-    refresh();
-    return 0;
-}
-
-void load_image_information(image_container *img, program_info *info, int x, int y) {
-    move(LINES - 2, 0);
-    clrtoeol();
-    mvprintw(LINES - 2, 10, "%s             %d:%d", info->fname, img->height, img->width);
-    mvprintw(LINES - 2, COLS - 20, "(%d,%d)     %d", y + img->y_buffer, x + img->x_buffer, info->loop_count);
-}
 
 WINDOW *create_window(unsigned int height, unsigned int width) {
     initscr();
