@@ -9,15 +9,12 @@ bool contains(tree **root, const uint32_t target){
     tree *t = *root;
     tree *current = t;
 
-    while (current->l != NULL && current->r != NULL){
-        uint32_t current_colour=(uint32_t)current->colour[0] << 16 |
-                                (uint32_t)current->colour[1] << 8  |
-                                (uint32_t)current->colour[2];
-        if (current_colour == target){ // this is the colour, return true
+    while (current != NULL){
+        if (current->colour_32 == target){ // this is the colour, return true
             return true;
         }
         else { // colour not found, keep going
-            if (target < current_colour){
+            if (target < current->colour_32){
                 if (current->l != NULL){
                     current = current->l;
                 }
@@ -25,7 +22,7 @@ bool contains(tree **root, const uint32_t target){
                     return false;
                 }
             }
-            else if (target > current_colour){
+            else if (target > current->colour_32){
                 if (current->r != NULL){
                     current = current->r;
                 }
@@ -43,15 +40,12 @@ uint64_t get_colour_code(tree **root, const uint32_t target){
     tree *t = *root;
     tree *current = t;
 
-    while (current->l != NULL && current->r != NULL){
-        uint32_t current_colour=(uint32_t)current->colour[0] << 16 |
-                                (uint32_t)current->colour[1] << 8  |
-                                (uint32_t)current->colour[2];
-        if (current_colour == target){ // this is the colour, return the colour code
+    while (current != NULL){
+        if (current->colour_32 == target){ // this is the colour, return the colour code
             return current->colour_code;
         }
         else { // colour not found, keep going
-            if (target < current_colour){
+            if (target < current->colour_32){
                 if (current->l != NULL){
                     current = current->l;
                 }
@@ -59,7 +53,7 @@ uint64_t get_colour_code(tree **root, const uint32_t target){
                     return 0;
                 }
             }
-            else if (target > current_colour){
+            else if (target > current->colour_32){
                 if (current->r != NULL){
                     current = current->r;
                 }
@@ -72,133 +66,80 @@ uint64_t get_colour_code(tree **root, const uint32_t target){
     return 0;
 }
 
-int insert_node(tree *root, tree **stack, tree *newnode, uint32_t target);
+tree *insert_node(tree *node, tree *newnode, uint32_t key);
 int initialize_colour(tree *newnode, const uint8_t *rgb, uint64_t next_colour_code);
-// returns the index of the first imbalanced node that is unbalanced,
-// the previous value on the stack will be that node's parent
-int update_height(tree **stack, int stack_count);
-void balance_tree(tree **root, tree **stack, int imbalanced_index);
+void update_height(tree *n);
 int get_bf(tree *l, tree *r);
 tree *r_r(tree *y);
 tree *l_r(tree *y);
+int height(tree *n);
 
 void insert(tree **root, const uint32_t target){
+    if (contains(root, target)){
+        return;
+    }
     tree *newnode = malloc(sizeof(tree));
     *newnode = (tree){
         .l = NULL,
         .r = NULL,
         .height = 1,
+        .colour_32 = target,
         .colour_code = 0
     };
 
-    uint32_t value = target;
-    uint8_t rgb[4];
-    memcpy(rgb, &value, sizeof value);
-    if (rgb[3] != 0){ // the image is transparent there's nothing there
+    newnode->colour[0] = (target >> 24) & 0xFF; // red
+    newnode->colour[1] = (target >> 16) & 0xFF; // green
+    newnode->colour[2] = (target >> 8)  & 0xFF; // blue
+    if ((target >> 24) == 0){ // the image is transparent there's nothing there
+        free(newnode);
         return;
     }
-
-    newnode->colour[0] = rgb[0];
-    newnode->colour[1] = rgb[1];
-    newnode->colour[2] = rgb[2];
 
     tree *t = *root;
     static uint64_t next_colour_code = START_COLOR_INDEX;
 
     if (*root == NULL) {
         *root = newnode;
-        next_colour_code += initialize_colour(newnode, rgb, next_colour_code);
+        next_colour_code += initialize_colour(newnode, newnode->colour, next_colour_code);
     }
     else {
-        tree **stack = malloc(sizeof(tree*)*128); // if the tree has more than 128 depth what the fuck are you doing
-        int stack_count = insert_node(*root, stack, newnode, target);
-        next_colour_code += initialize_colour(newnode, rgb, next_colour_code);
-        int i = update_height(stack, stack_count);
-        balance_tree(root, stack, i);
+        *root = insert_node(*root, newnode, target);
+        next_colour_code += initialize_colour(newnode, newnode->colour, next_colour_code);
     }
 }
-
-int insert_node(tree *root, tree **stack, tree *newnode, uint32_t target){
-    tree *current = root;
-    int stack_count = 0;
-    while (current->l != NULL && current->r != NULL){
-        uint32_t current_colour = (uint32_t)current->colour[0] << 16 |
-                                  (uint32_t)current->colour[1] << 8  |
-                                  (uint32_t)current->colour[2];
-
-        if (current != NULL && current_colour == target){ // this colour already exists, return
-            free(stack);
-            return 0;
-        }
-        else { // colour not found, keep going
-            if (target < current_colour){
-                if (current->l != NULL){
-                    stack_count += 1;
-                    stack[stack_count++] = current;
-
-                    current = current->l;
-                }
-                else {
-                    current->l = newnode;
-                    break;
-                }
-            }
-            else if (target > current_colour){
-                if (current->r != NULL){
-                    stack_count += 1;
-                    stack[stack_count++] = current;
-
-                    current = current->r;
-                }
-                else {
-                    current->r = newnode;
-                    break;
-                }
-            }
-        }
+tree *insert_node(tree *node, tree *newnode, uint32_t key){
+    if (node == NULL){
+        return newnode;
     }
 
-    return stack_count;
-}
+    if (key < node->colour_32){
+        node->l = insert_node(node->l, newnode, key);
+    }
+    else if (key > node->colour_32){
+        node->r = insert_node(node->r, newnode, key);
+    }
+    else {
+        return node;
+    }
 
-void balance_tree(tree **root, tree **stack, int imbalanced_index){
-        if (imbalanced_index != -1) {
-            tree *z = stack[imbalanced_index];
-            tree *parent = (imbalanced_index > 0) ? stack[imbalanced_index - 1] : NULL;
+    update_height(node);
+    int bf = get_bf(node->l, node->r);
+    if (bf > 1 && node->l != NULL && key < node->l->colour_32){ // LL
+        return r_r(node);
+    }
+    if (bf > 1 && node->l != NULL && key > node->l->colour_32){ // LR
+        node->l = l_r(node->l);
+        return r_r(node);
+    }
+    if (bf < -1 && node->r != NULL && key > node->r->colour_32){ // RR
+        return l_r(node);
+    }
+    if (bf < -1 && node->r != NULL && key < node->r->colour_32){ // RL
+        node->r = r_r(node->r);
+        return l_r(node);
+    }
 
-            int bfz = get_bf(z->l, z->r);
-
-            tree *new_subroot = NULL;
-
-            if (bfz < -1 && get_bf(z->l->l, z->l->r) <= 0) { // LL
-                new_subroot = r_r(z);
-            }
-            else if (bfz > 1 && get_bf(z->r->l, z->r->r) >= 0) { // RR
-                new_subroot = l_r(z);
-            }
-            else if (bfz < -1 && get_bf(z->l->l, z->l->r) > 0) { // LR
-                z->l = l_r(z->l);
-                new_subroot = r_r(z);
-            }
-            else if (bfz > 1 && get_bf(z->r->l, z->r->r) < 0) { // RR
-                z->r = r_r(z->r);
-                new_subroot = l_r(z);
-            }
-
-            // Reattach to parent or root
-            if (new_subroot != NULL) {
-                if (parent == NULL){
-                    *root = new_subroot;
-                }
-                else if (parent->l == z){
-                    parent->l = new_subroot;
-                }
-                else {
-                    parent->r = new_subroot;
-                }
-            }
-        }
-        free(stack);
+    return node;
 }
 
 int initialize_colour(tree *newnode, const uint8_t *rgb, uint64_t next_colour_code){
@@ -207,20 +148,6 @@ int initialize_colour(tree *newnode, const uint8_t *rgb, uint64_t next_colour_co
     init_extended_pair(next_colour_code, COLOR_BLACK, next_colour_code);
     newnode->colour_code += next_colour_code;
     return 1;
-}
-
-
-int update_height(tree **stack, int stack_count){
-    int first_imbalanced = -1;
-    for (int i=stack_count-1; i > 0 ;i--){
-        tree *node = stack[i];
-        node->height += 1;
-        int bf = get_bf(node->l, node->r);
-        if ((bf > 1 || bf < -1) && first_imbalanced == -1){
-            first_imbalanced = i;
-        }
-    }
-    return first_imbalanced;
 }
 
 int get_bf(tree *l, tree *r){
@@ -234,5 +161,45 @@ int get_bf(tree *l, tree *r){
         rval = r->height;
     }
 
-    return rval - lval;
+    return lval - rval;
+}
+
+int height(tree *n) {
+    return n ? n->height : 0;
+}
+
+void update_height(tree *n) {
+    n->height = 1 + (height(n->l) > height(n->r)
+                    ? height(n->l)
+                    : height(n->r));
+}
+
+tree *r_r(tree *y){
+    if (!y || !y->l)
+        return y;
+    tree *x = y->l;
+    tree *T2 = x->r;
+
+    x->r = y;
+    y->l = T2;
+
+    update_height(y);
+    update_height(x);
+
+    return x;
+}
+
+tree *l_r(tree *y){
+    if (!y || !y->r)
+        return y;
+    tree *x = y->r;
+    tree *T2 = x->l;
+
+    x->l = y;
+    y->r = T2;
+
+    update_height(y);
+    update_height(x);
+
+    return x;
 }

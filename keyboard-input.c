@@ -71,28 +71,28 @@ void key_press(image_container *img, program_info *info, unsigned int *x, unsign
             }
             load_colours(img);
             break;
-        case 'd':
-            if (info->current_colour == -1)
-                break;
-            draw_at(img, *x, *y, info->user_colours[info->current_colour].r, info->user_colours[info->current_colour].g, info->user_colours[info->current_colour].b);
-            generate_colours_from_pixel_ratio(img, y, x);
-            load_colours(img);
-            break;
-        case 'c':
-            cut_at(img, *x, *y);
-            generate_colours_from_pixel_ratio(img, y, x);
-            load_colours(img);
-            break;
-        case 'v':
-            select_fill_from_image(img, info, x, y);
-            generate_colours_from_pixel_ratio(img, y, x);
-            load_colours(img);
-            break;
-        case 'V':
-            select_from_image(img, info, x, y);
-            generate_colours_from_pixel_ratio(img, y, x);
-            load_colours(img);
-            break;
+        // case 'd':
+        //     if (info->current_colour == -1)
+        //         break;
+        //     draw_at(img, *x, *y, info->user_colours[info->current_colour].r, info->user_colours[info->current_colour].g, info->user_colours[info->current_colour].b);
+        //     generate_colours_from_pixel_ratio(img, y, x);
+        //     load_colours(img);
+        //     break;
+        // case 'c':
+        //     cut_at(img, *x, *y);
+        //     generate_colours_from_pixel_ratio(img, y, x);
+        //     load_colours(img);
+        //     break;
+        // case 'v':
+        //     select_fill_from_image(img, info, x, y);
+        //     generate_colours_from_pixel_ratio(img, y, x);
+        //     load_colours(img);
+        //     break;
+        // case 'V':
+        //     select_from_image(img, info, x, y);
+        //     generate_colours_from_pixel_ratio(img, y, x);
+        //     load_colours(img);
+        //     break;
         case ':': // handles commands from the user
             // TODO: REMOVE WHEN ITS FINISHED
             if (true)
@@ -165,32 +165,32 @@ void process_user_command(image_container *img, program_info *info, unsigned int
 
         // TODO: implement cropping
     }
-    else if (compare_at(command, "pr", 2)) { // create the pixel ratio
-        int total = 0;
-        for (int pos = 2; pos < len; pos++) {
-            total = total * 10;
-            total += command[pos] - '0';
-        }
-        if (total != 0) {
-            if ((img->height % total) == 0 && (img->width % total) == 0) {
-                img->pixel_ratio = total;
-                printw("Pixel ratio =%d", img->pixel_ratio);
-                generate_colours_from_pixel_ratio(img, y, x);
-                load_colours(img);
-            }
-            else {
-                mvaddstr(LINES - 1, 0, "Invalid input (press any key to continue)");
-                getch();
-            }
-        }
-    }
+    // else if (compare_at(command, "pr", 2)) { // create the pixel ratio
+    //     int total = 0;
+    //     for (int pos = 2; pos < len; pos++) {
+    //         total = total * 10;
+    //         total += command[pos] - '0';
+    //     }
+    //     if (total != 0) {
+    //         if ((img->height % total) == 0 && (img->width % total) == 0) {
+    //             img->pixel_ratio = total;
+    //             printw("Pixel ratio =%d", img->pixel_ratio);
+    //             generate_colours_from_pixel_ratio(img, y, x);
+    //             load_colours(img);
+    //         }
+    //         else {
+    //             mvaddstr(LINES - 1, 0, "Invalid input (press any key to continue)");
+    //             getch();
+    //         }
+    //     }
+    // }
 }
 
 void display_defined_colours(program_info *info);
 bool read_colour_command(int *cmd_selected_colour, char **cmd, int *cmd_len);
 
 void user_colour(program_info *info){
-    display_defined_colours(info);
+    // display_defined_colours(info);
 
     int col_cmd_len;
     char *colour_command;
@@ -389,3 +389,5 @@ bool read_colour_command(int *cmd_selected_colour, char **cmd, int *cmd_len){
     free(unformatted_cmd);
     return true;
 }
+
+

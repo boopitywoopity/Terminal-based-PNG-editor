@@ -34,7 +34,7 @@ typedef struct {
     int loop_count;
     bool loop_count_assigned;
 
-    point_w_colour *user_colours;
+    uint32_t user_colours;
     int current_colour;
 
     enum traverse_mode {
@@ -44,6 +44,14 @@ typedef struct {
     } mode;
 } program_info;
 
+typedef struct tree_t {
+    uint32_t height;
+    uint64_t colour_code;
+    uint8_t colour[3];
+    uint32_t colour_32;
+    struct tree_t *l, *r;
+} tree;
+
 // This struct isused to facilitate passing information between functions.
 // It should contain most of everything the function needs in terms of image details.
 typedef struct {
@@ -52,10 +60,11 @@ typedef struct {
 
     unsigned int width, height;
 
-    point_w_colour **total_image;
+    uint32_t **total_image;
 
     unsigned int colour_index, current_colours, current_max_colours;
-    RGB_spectrum *colours;
+    // RGB_spectrum *colours;
+    tree *root;
 
     xy_point *points;
 } image_container;
@@ -81,16 +90,10 @@ image_container load_image(unsigned char *image, unsigned int width, unsigned in
 program_info generate_default_program_info(char *fname);
 
 
+
 // avl.c
 
-typedef struct tree_t {
-    uint32_t height;
-    uint64_t colour_code;
-    uint8_t colour[3];
-    struct tree_t *l, *r;
-} tree;
-
-bool has_color(tree **root, const uint32_t target);
+bool contains(tree **root, const uint32_t target);
 uint64_t get_colour_code(tree **root, const uint32_t target);
 void insert(tree **root, const uint32_t value);
 
