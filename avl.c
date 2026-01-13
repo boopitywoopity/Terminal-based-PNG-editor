@@ -3,11 +3,24 @@
 #include <stdlib.h>
 #include <string.h>
 
+void cleanup_rec(tree *n);
 
+void cleanup_tree(tree **root){
+    cleanup_rec(*root);
+}
+
+void cleanup_rec(tree *n){
+    if (n->l != NULL){
+        cleanup_rec(n->l);
+    }
+    if (n->r != NULL){
+        cleanup_rec(n->r);
+    }
+    free(n);
+}
 
 bool contains(tree **root, const uint32_t target){
-    tree *t = *root;
-    tree *current = t;
+    tree *current = *root;
 
     while (current != NULL){
         if (current->colour_32 == target){ // this is the colour, return true
@@ -36,7 +49,7 @@ bool contains(tree **root, const uint32_t target){
 }
 
 // returns 0 if not found
-uint64_t get_colour_code(tree **root, const uint32_t target){
+uint32_t get_colour_code(tree **root, const uint32_t target){
     tree *t = *root;
     tree *current = t;
 
@@ -67,7 +80,7 @@ uint64_t get_colour_code(tree **root, const uint32_t target){
 }
 
 tree *insert_node(tree *node, tree *newnode, uint32_t key);
-int initialize_colour(tree *newnode, const uint8_t *rgb, uint64_t next_colour_code);
+int initialize_colour(tree *newnode, const uint8_t *rgb, uint32_t next_colour_code);
 void update_height(tree *n);
 int get_bf(tree *l, tree *r);
 tree *r_r(tree *y);
@@ -75,9 +88,6 @@ tree *l_r(tree *y);
 int height(tree *n);
 
 void insert(tree **root, const uint32_t target){
-    if (contains(root, target)){
-        return;
-    }
     tree *newnode = malloc(sizeof(tree));
     *newnode = (tree){
         .l = NULL,
@@ -90,13 +100,13 @@ void insert(tree **root, const uint32_t target){
     newnode->colour[0] = (target >> 24) & 0xFF; // red
     newnode->colour[1] = (target >> 16) & 0xFF; // green
     newnode->colour[2] = (target >> 8)  & 0xFF; // blue
-    if ((target >> 24) == 0){ // the image is transparent there's nothing there
+    if ((target << 24) == 0){ // the image is transparent there's nothing there
         free(newnode);
         return;
     }
 
     tree *t = *root;
-    static uint64_t next_colour_code = START_COLOR_INDEX;
+    static uint32_t next_colour_code = START_COLOR_INDEX;
 
     if (*root == NULL) {
         *root = newnode;
@@ -142,9 +152,11 @@ tree *insert_node(tree *node, tree *newnode, uint32_t key){
     return node;
 }
 
-int initialize_colour(tree *newnode, const uint8_t *rgb, uint64_t next_colour_code){
+int initialize_colour(tree *newnode, const uint8_t *rgb, uint32_t next_colour_code){
     // initialize the colour
-    init_extended_color(next_colour_code, rgb[0], rgb[1], rgb[2]);
+    fprintf(stderr, "Initializing colour rgb(%d,%d,%d)\n", rgb[0], rgb[1], rgb[2]);
+    init_extended_color(next_colour_code, rgb[0]*1000/255, rgb[1]*1000/255, rgb[2]*1000/255);
+    // init_extended_color(next_colour_code, rgb[0], rgb[1], rgb[2]);
     init_extended_pair(next_colour_code, COLOR_BLACK, next_colour_code);
     newnode->colour_code += next_colour_code;
     return 1;

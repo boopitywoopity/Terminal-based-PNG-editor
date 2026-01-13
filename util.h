@@ -94,8 +94,9 @@ program_info generate_default_program_info(char *fname);
 // avl.c
 
 bool contains(tree **root, const uint32_t target);
-uint64_t get_colour_code(tree **root, const uint32_t target);
+uint32_t get_colour_code(tree **root, const uint32_t target);
 void insert(tree **root, const uint32_t value);
+void cleanup_tree(tree **root);
 
 // keyboard-input.c
 

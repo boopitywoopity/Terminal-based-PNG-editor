@@ -9,12 +9,12 @@
 #include "util.h"
 
 // TODO
-// 1. Refactor main such that it conforms with the standard
-// 2. Refactor the key_press function such that it's not a piece of shit
-// 3. Implement regex to the key_press for checking user input
-// 4. Fix potential memory leaks
-// 5. Spend time understanding what some parts of the code do and how/why (been a couple years since I originally wrote this some parts of this are weird)
-// 6. Rewrite the way colors are done, each point are a hash that points to a value in a tree (avl tree?)
+// - Refactor main such that it conforms with the standard
+// - Refactor the key_press function such that it's not a piece of shit
+// - Implement regex to the key_press for checking user input
+// - Fix potential memory leaks
+// - Reimplement Cut at and draw at
+// - Reimplement user colours
 
 
 
@@ -86,12 +86,11 @@ int main(int e, char **args) {
     // cleanup
     endwin();
     stbi_image_free(image); // the following lines of code just free items
-    for (int i = 0; i < img.current_colours; i++) {
-        free(img.colours[i].point);
-    }
+    cleanup_tree(&img.root);
 
-    free(info.user_colours);
-    free(img.colours);
+    for (int i=0; i<img.height;i++){
+        free(img.total_image[i]);
+    }
     free(img.total_image);
 
     printf("Colour count at program stop: %d\n", img.current_colours);
